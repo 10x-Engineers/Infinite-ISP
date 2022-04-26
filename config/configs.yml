@@ -1,0 +1,55 @@
+sensor_info:
+  bayer_pattern: "rggb"
+  range: 1023
+  width: 1920
+  height: 1080
+  hdr: False
+
+dead_pixel_correction: 
+  toggle: True
+  dp_threshold: 0
+
+hdr_stitching: ~
+
+lens_shading_correction: ~
+
+bayer_noise_reduction: ~
+
+black_level_correction: 
+  toggle: True
+  r_offset: 0
+  gr_offset: 0
+  gb_offset: 0
+  b_offset: 0
+
+white_balance:
+  toggle: True 
+  r_gain: 1.0
+  b_gain: 1.0
+
+pre_gamma: ~
+
+tone_mapping: ~
+
+demosaic: ~
+
+color_correction_matrix:
+  toggle: True 
+  corrected_red: [1, 0, 0, 0]
+  corrected_green: [0, 1, 0, 0]
+  corrected_blue: [0, 0, 1, 0]
+
+gamma_correction: ~
+
+color_space_conversion: ~
+
+2d_noise_reduction:
+  toggle: True 
+  window_size: 13
+  patch_size: 5
+  sigma: 5
+  sensitivity: 10
+
+sharpen: ~
+
+jpeg_conversion: ~
