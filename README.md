@@ -8,7 +8,7 @@ The project aims to produce outputs that are fine tuned to best possible results
 
 
 ## Modules
-![](https://github.com/xx-isp/infinite-isp/blob/main/assets/infinite-isp-architecture-initial.png)
+![](assets/infinite-isp-architecture-initial.png)
 
 ### Dead Pixel Correction
 
@@ -68,6 +68,36 @@ Algorithm details goes here
 
 Algorithm details goes here
 
+## Algorithm Implementation Checklist
+
+- [ ] Dead Pixel Correction
+- [ ] HDR Stitching
+- [ ] Lens Shading Correction
+- [ ] Bayer Noise Reduction
+- [ ] Black Level Calibration
+- [x] Auto White Balance
+    - [x] Gray World
+- [ ] Pre Gamma 
+- [ ] Tone Mapping
+- [x] Demosaicing
+
+- [x] Color Correction Matrix
+- [ ] Color Space Conversion
+- [ ] 2d Noise Reduction
+- [ ] Sharpening
+- [ ] Compression / Conversion
+
 ## Usage
 Each pipeline module can be tuned from the `configs.yml` configuration file . The configuration file contains all the modules. Each module contains algorithms and algorithm specific parameters.  
 
+## Dependencies
+The project is written in python3 which requires the following packages to be installed before running.  
+- `matplotlib`
+- `numpy`
+- `yaml`
+
+## License 
+MIT License (see [LICENSE](LICENSE) file).
+
+## Acknowledgments
+- This project started of from the inspiration of [cruxopen/openISP](https://github.com/cruxopen/openISP.git)
