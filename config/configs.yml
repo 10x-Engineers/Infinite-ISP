@@ -1,55 +1,66 @@
 sensor_info:
-  bayer_pattern: "rggb"
+  bayer_pattern: "bggr"
   range: 1023
+  bitdep: 12
   width: 1920
   height: 1080
   hdr: False
 
 dead_pixel_correction: 
-  toggle: True
+  isEnable: False
   dp_threshold: 0
 
-hdr_stitching: ~
+hdr_stitching: 
+  isEnable: False
 
-lens_shading_correction: ~
+lens_shading_correction: 
+  isEnable: False
 
-bayer_noise_reduction: ~
+bayer_noise_reduction: 
+  isEnable: False
 
 black_level_correction: 
-  toggle: True
+  isEnable: False
   r_offset: 0
   gr_offset: 0
   gb_offset: 0
   b_offset: 0
 
 white_balance:
-  toggle: True 
+  isEnable: True 
   r_gain: 1.0
   b_gain: 1.0
 
-pre_gamma: ~
+pre_gamma: 
+  isEnable: False
 
-tone_mapping: ~
+tone_mapping: 
+  isEnable: False
 
-demosaic: ~
+demosaic:
+  isEnable: True
 
 color_correction_matrix:
-  toggle: True 
-  corrected_red: [1, 0, 0, 0]
-  corrected_green: [0, 1, 0, 0]
-  corrected_blue: [0, 0, 1, 0]
+  isEnable: True 
+  corrected_red: [1.51, -0.52, 0.004]
+  corrected_green: [-0.41, 1.55, -0.14]
+  corrected_blue: [-0.11, -0.93, 2.04]
 
-gamma_correction: ~
+gamma_correction: 
+  isEnable: False
 
-color_space_conversion: ~
+color_space_conversion: 
+  isEnable: False
 
 2d_noise_reduction:
-  toggle: True 
+  isEnable: False 
   window_size: 13
   patch_size: 5
   sigma: 5
   sensitivity: 10
 
-sharpen: ~
+sharpen:
+  isEnable: False
 
-jpeg_conversion: ~
+jpeg_conversion: 
+  isEnable: False
