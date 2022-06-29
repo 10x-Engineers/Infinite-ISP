@@ -50,7 +50,7 @@ O. Losson, L. Macaire, and Y. Yang. Comparison of color demosaicing methods. _In
 
 ### Color Correction Matrix
 
-Since the color correction matrix is tuned offline and is stored in the isp as register parameters the current module implements the application of color correction matrix provided in the `config.yml` file. 
+Since the color correction matrix is tuned offline and is stored in the ISP as register parameters the current module implements the application of color correction matrix provided in the `config.yml` file. 
 
 ### Color Space Conversion
 
@@ -95,6 +95,23 @@ The project is written in python3 which requires the following packages to be in
 - `matplotlib`
 - `numpy`
 - `yaml`
+
+## FAQ
+**Why is it named infinite-isp?**
+
+ISPs are hardware dependent. In them algorithms are limited to perform to their best because of hardware limitations. Infinite-isp tends to somewhat remove this limitation and let the algorithms perform to the full potential targeting best results. 
+
+**Will inifnite-isp also contain algorithms that involve machine learning?**
+
+Yes definitely this is mainly because it is seen that machine learning models tend to perform much better results as compared to conventional models. The plan is as follows
+
+- The release `v0.x` till `v1.0` will involve buildng a basic ISP pipelne at conventional level. 
+
+- The release `v1.0` will have all camera pipeline modules implemented at conventional level. `v1.x.x` releases will have all the necessary improvements of these conventional algorithms till release `v2.0`
+
+- From release `v2.0` infinite-isp will start implementing machine learning models for specific algorithms. 
+
+- Release `v3.0` will have infinite-isp having both conventional and deep learning algorithms (not for all pipeline modules but for specific ones)
 
 ## License 
 MIT License (see [LICENSE](LICENSE) file).
