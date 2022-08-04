@@ -118,3 +118,9 @@ MIT License (see [LICENSE](LICENSE) file).
 
 ## Acknowledgments
 - This project started of from the inspiration of [cruxopen/openISP](https://github.com/cruxopen/openISP.git)
+
+## List of Open Source ISPs
+- [Fast Open Image Signal Processor](https://github.com/QiuJueqin/fast-openISP.git)
+- [simple-camera-pipeline](https://github.com/AbdoKamel/simple-camera-pipeline.git)
+- [A Software Platform for Manipulating the Camera Imaging Pipeline](https://karaimer.github.io/camera-pipeline)
+- [rawpy](https://github.com/letmaik/rawpy.git)
