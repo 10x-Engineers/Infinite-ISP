@@ -1,14 +1,18 @@
+# File: yuv_conv_format.py
+# Description: 
+# Code / Paper  Reference:  https://web.archive.org/web/20190220164028/http://www.sunrayimage.com/examples.html
+#                           https://en.wikipedia.org/wiki/YUV
+#                           https://learn.microsoft.com/en-us/windows/win32/medfound/recommended-8-bit-yuv-formats-for-video-rendering
+#                           https://www.flir.com/support-center/iis/machine-vision/knowledge-base/understanding-yuv-data-formats/
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 import numpy as np
-import colour_demosaicing as cd
 from matplotlib import pyplot as plt
 
 
 class YUVConvFormat:
     'YUV Conversion Formats - 444, 442'
-    #https://web.archive.org/web/20190220164028/http://www.sunrayimage.com/examples.html
-    #https://en.wikipedia.org/wiki/YUV
-    #https://learn.microsoft.com/en-us/windows/win32/medfound/recommended-8-bit-yuv-formats-for-video-rendering
-    #https://www.flir.com/support-center/iis/machine-vision/knowledge-base/understanding-yuv-data-formats/
 
 
     def __init__(self, img, sensor_info, parm_yuv, inputfile_name, parm_csc):

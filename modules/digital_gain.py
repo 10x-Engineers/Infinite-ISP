@@ -1,3 +1,9 @@
+# File: digital_gain.py
+# Description: Applies the digital gain based on config file also interacts with AE when adjusting exposure
+# Code / Paper  Reference:                          
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 import numpy as np
 
 

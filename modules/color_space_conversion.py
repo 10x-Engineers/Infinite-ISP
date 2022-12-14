@@ -1,14 +1,18 @@
+# File: color_space_conversion.py
+# Description: Converts RGB to YUV or YCbCr 
+# Code / Paper  Reference: https://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.709_conversion
+#                          https://www.itu.int/rec/R-REC-BT.601/
+#                          https://www.itu.int/rec/R-REC-BT.709-6-201506-I/en
+#                          https://learn.microsoft.com/en-us/windows/win32/medfound/recommended-8-bit-yuv-formats-for-video-rendering
+#                          https://web.archive.org/web/20180423091842/http://www.equasys.de/colorconversion.html
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 from pickletools import uint8
 import numpy as np
 
 
 class ColorSpaceConv:
-
-    #https://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.709_conversion
-    #https://www.itu.int/rec/R-REC-BT.601/
-    #https://www.itu.int/rec/R-REC-BT.709-6-201506-I/en
-    #https://learn.microsoft.com/en-us/windows/win32/medfound/recommended-8-bit-yuv-formats-for-video-rendering
-    #https://web.archive.org/web/20180423091842/http://www.equasys.de/colorconversion.html
 
     def __init__(self, img, sensor_info, parm_csc):
         self.img = img

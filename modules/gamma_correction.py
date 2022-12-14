@@ -1,3 +1,9 @@
+# File: gamma_correction.py
+# Description: Implements the gamma look up table provided in the config file
+# Code / Paper  Reference: 
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 import numpy as np
 
 

@@ -1,3 +1,8 @@
+# File: white_balance.py
+# Description: Applies the white balance gains from the config file
+# Code / Paper  Reference: 
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
 import numpy as np
 
 
@@ -93,7 +98,7 @@ class WhiteBalance:
             print('White balancing = ' + "True")
             return self.apply_wb_parameters()
 
-        print('White balancing = ' + "False")
+        print('Manual White balancing = ' + "False")
         return self.img
 
     

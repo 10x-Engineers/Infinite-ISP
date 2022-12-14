@@ -1,3 +1,9 @@
+# File: crop.py
+# Description: Crops the bayer image keeping cfa pattern intact
+# Code / Paper  Reference: 
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 import numpy as np
 
 class Crop:

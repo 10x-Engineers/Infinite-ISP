@@ -1,0 +1,6 @@
+matplotlib==3.5.1
+numpy==1.21.5
+PyYAML==6.0
+rawpy==0.17.3
+scipy==1.7.3
+tqdm==4.64.1

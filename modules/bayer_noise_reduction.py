@@ -1,3 +1,9 @@
+# File: bayer_noise_reduction.py
+# Description: Noise reduction in bayer domain
+# Code / Paper  Reference: https://www.researchgate.net/publication/261753644_Green_Channel_Guiding_Denoising_on_Bayer_Image                    
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 import numpy as np
 from scipy import ndimage
 import warnings

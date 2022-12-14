@@ -1,3 +1,11 @@
+# File: auto_white_balance.py
+# Description: 3A - AWB Runs the AWB algorithm based on selection from config file
+# Code / Paper  Reference: https://www.sciencedirect.com/science/article/abs/pii/0016003280900587
+#                          https://library.imaging.org/admin/apis/public/api/ist/website/downloadArticle/cic/12/1/art00008
+#                          https://opg.optica.org/josaa/viewmedia.cfm?uri=josaa-31-5-1049&seq=0
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 import numpy as np
 
 class AutoWhiteBalance:
@@ -73,7 +81,7 @@ class AutoWhiteBalance:
     def apply_white_balance_gain(self):
         
         # Removed overexposed and underexposed pixels for wb gain calculation
-        x = np.sum(np.where((self.img<5)|(self.img>250), 1, 0), axis=2)
+        x = np.sum(np.where((self.img<15)|(self.img>240), 1, 0), axis=2)
         self.flatten_img = self.img[x==0]
 
         # estimated illuminant RBG is obtained from selected algorithm
@@ -87,8 +95,9 @@ class AutoWhiteBalance:
 
         self.img = np.float32(self.img)
         # white balance gains G/R and G/B are calculated from RGB returned from AWB Algorithm
-        rgain = rgb[1]/rgb[0]
-        bgain = rgb[1]/rgb[2]
+        # 0 if nan is encountered  
+        rgain = np.nan_to_num(rgb[1]/rgb[0])
+        bgain = np.nan_to_num(rgb[1]/rgb[2])
 
         #Check if r_gain and b_gain go out of bound
         rgain = 1 if rgain <= 0 else rgain

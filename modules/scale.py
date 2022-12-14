@@ -1,3 +1,9 @@
+# File: scale.py
+# Description: Implements both hardware friendly and non hardware freindly scaling
+# Code / Paper  Reference: https://patentimages.storage.googleapis.com/f9/11/65/a2b66f52c6dbd4/US8538199.pdf
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 import numpy as np
 from modules.crop import Crop
 import util.utils as utils

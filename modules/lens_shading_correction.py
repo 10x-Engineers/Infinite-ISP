@@ -1,3 +1,9 @@
+# File: lens_shading_correction.py
+# Description: 
+# Code / Paper  Reference: 
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 import numpy as np
 
 

@@ -1,6 +1,10 @@
+# File: noise_reduction_2d.py
+# Description: 
+# Code / Paper  Reference: https://www.ipol.im/pub/art/2011/bcm_nlm/article.pdf
 # Implementation inspired from:
 # Fast Open ISP Author: Qiu Jueqin (qiujueqin@gmail.com)
 # & scikit-image (nl_means_denoising)
+# Author: xx-isp (ispinfinite@gmail.com)
 #------------------------------------------------------------
 
 import numpy as np

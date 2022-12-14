@@ -1,3 +1,9 @@
+# File: black_level_correction.py
+# Description: Implements black level correction and image linearization based on config file params
+# Code / Paper  Reference:                           
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 import numpy as np
 
 

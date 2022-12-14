@@ -1,3 +1,10 @@
+# File: dead_pixel_correction.py
+# Description: Corrects the hot or dead pixels
+# Code / Paper  Reference: https://ieeexplore.ieee.org/document/9194921                   
+# Implementation inspired from: (OpenISP) https://github.com/cruxopen/openISP
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 import numpy as np
 from tqdm import tqdm
 

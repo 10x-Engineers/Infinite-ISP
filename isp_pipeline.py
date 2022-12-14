@@ -1,3 +1,9 @@
+# File: isp_pipeline.py
+# Description: Executes the complete pipeline
+# Code / Paper  Reference: 
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 from matplotlib import pyplot as plt
 import numpy as np
 import yaml

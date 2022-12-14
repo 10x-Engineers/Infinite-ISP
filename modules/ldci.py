@@ -1,5 +1,10 @@
+# File: ldci.py
+# Description: Implements the contrast adjustment in the YUV domain
+# Code / Paper  Reference: https://arxiv.org/ftp/arxiv/papers/2108/2108.12818.pdf#:~:text=The%20technique%20to%20equalize%20the,a%20linear%20trend%20(CDF).
 # Implementation inspired from: MATLAB &
 # Fast Open ISP Author: Qiu Jueqin (qiujueqin@gmail.com)
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
 
 import numpy as np
 import math

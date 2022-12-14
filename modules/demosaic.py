@@ -1,3 +1,9 @@
+# File: demosaic.py
+# Description: Implements the cfa interpolation 
+# Code / Paper  Reference: https://www.ipol.im/pub/art/2011/g_mhcd/article.pdf                          
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 import numpy as np
 from scipy.signal import correlate2d
 

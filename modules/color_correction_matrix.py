@@ -1,3 +1,9 @@
+# File: color_correction_matrix.py
+# Description: Applies the 3x3 correction matrix on the image
+# Code / Paper  Reference: https://www.imatest.com/docs/colormatrix/
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 import numpy as np
 
 

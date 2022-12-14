@@ -1,3 +1,10 @@
+# File: auto_exposure.py
+# Description: 3A-AE Runs the Auto exposure algorithm in a loop
+# Code / Paper  Reference: https://www.atlantis-press.com/article/25875811.pdf
+#                          http://tomlr.free.fr/Math%E9matiques/Math%20Complete/Probability%20and%20statistics/CRC%20-%20standard%20probability%20and%20Statistics%20tables%20and%20formulae%20-%20DANIEL%20ZWILLINGER.pdf
+# Author: xx-isp (ispinfinite@gmail.com)
+#------------------------------------------------------------
+
 import numpy as np
 from scipy.stats import skew
 import matplotlib.pyplot as plt
@@ -159,9 +166,10 @@ class AutoExposure:
         grey_img = np.clip(np.dot(img[...,:3], [0.299, 0.587, 0.144]), 0, 255).astype(np.uint8)
         return grey_img, np.average(grey_img, axis=(0,1))
 
-    def get_luminance_histogram_skewness(self, img):
+    def get_luminance_histogram_skewness(self, img): 
+       
+        # Zwillinger, D. and Kokoska, S. (2000). CRC Standard Probability and Statistics Tables and Formulae. Chapman & Hall: New York. 2000. Section 2.2.24.1
         
-        # return skew((img- self.center_illuminance ).flatten())
         # First subtract central luminance to calculate skewness around it
         img = img-self.center_illuminance 
 
@@ -173,7 +181,7 @@ class AutoExposure:
         m3 = np.sum(np.power(img,3))/N
 
         G1 = np.sqrt(N*(N-1))/(N-2)
-        return (m3/abs(m2)**(3/2))*G1
+        return np.nan_to_num((m3/abs(m2)**(3/2))*G1)
         
 
     def execute(self):
