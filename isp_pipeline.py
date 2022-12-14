@@ -11,6 +11,7 @@ from modules.bayer_noise_reduction import BayerNoiseReduction as BNR
 from modules.black_level_correction import BlackLevelCorrection as BLC
 from modules.oecf import OECF
 from modules.white_balance import WhiteBalance as WB
+from modules.auto_white_balance import AutoWhiteBalance as AWB
 from modules.gamma_correction import GammaCorrection as GC
 from modules.tone_mapping import ToneMapping as TM
 from modules.demosaic import CFAInterpolation as CFA_I
@@ -51,6 +52,7 @@ parm_bnr = c_yaml['bayer_noise_reduction']
 parm_blc = c_yaml['black_level_correction']
 parm_oec = c_yaml['OECF']
 parm_wbc = c_yaml['white_balance']
+parm_awb = c_yaml['auto_white_balance']
 parm_gmm = c_yaml['pre_gamma']
 parm_tmp = c_yaml['tone_mapping']
 parm_dem = c_yaml['demosaic']
@@ -109,16 +111,19 @@ tmap_img = tmap.execute()
 cfa_inter = CFA_I(tmap_img, sensor_info, parm_dem)
 demos_img = cfa_inter.execute()
 
-#  Color correction matrix
-ccm = CCM(demos_img, sensor_info, parm_ccm)
+awb = AWB(demos_img, sensor_info, parm_wbc, parm_awb)
+awb_img = awb.execute()
+
+# 10 Color correction matrix
+ccm = CCM(awb_img, sensor_info, parm_ccm)
 ccm_img = ccm.execute()
 
-#  Gamma
-gc = GC(demos_img, sensor_info, parm_gmc)
+# 11 Gamma
+gc = GC(ccm_img, sensor_info, parm_gmc)
 gamma_raw = gc.execute()
 
 #  Color space conversion
-csc = CSC(ccm_img, sensor_info, parm_csc)
+csc = CSC(gamma_raw, sensor_info, parm_csc)
 csc_img = csc.execute()
 
 # Local Dynamic Contrast Improvement

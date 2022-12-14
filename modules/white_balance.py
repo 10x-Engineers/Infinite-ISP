@@ -7,6 +7,7 @@ class WhiteBalance:
     def __init__(self, img, sensor_info, parm_wbc):
         self.img = img
         self.enable = parm_wbc['isEnable']
+        self.auto = parm_wbc['isAuto']
         self.sensor_info = sensor_info
         self.parm_wbc = parm_wbc
     
@@ -86,12 +87,14 @@ class WhiteBalance:
         return raw_whitebal
 
     def execute(self):
-        print('White balancing = ' + str(self.enable))
 
-        if self.enable == False:
-            return self.raw
 
-        return self.apply_wb_parameters()
+        if self.enable == True and self.auto == False:
+            print('White balancing = ' + "True")
+            return self.apply_wb_parameters()
+
+        print('White balancing = ' + "False")
+        return self.img
 
     
         
