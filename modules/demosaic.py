@@ -13,22 +13,21 @@ class CFAInterpolation:
         self.parm_dem = parm_dem
 
     def demosaic_raw(self):
-
-        #get config parm
+        # get config parm
         bpp = self.sensor_info['bitdep']
         bayer = self.sensor_info['bayer_pattern']
-        
-        #normalize img
-        self.img = np.float32(self.img) / ((2**bpp)-1)
+
+        # normalize img
+        self.img = np.float32(self.img) / ((2 ** bpp) - 1)
 
         # convert to 8bit raw for input compatibility
-        hs_raw = np.uint8(self.img*255)
+        hs_raw = np.uint8(self.img * 255)
         img = np.uint8(cd.demosaicing_CFA_Bayer_bilinear(hs_raw, bayer))
         return img
 
     def execute(self):
         print('CFA interpolation (demosaicing) = ' + str(self.enable))
-        
+
         if self.enable == False:
             return self.img
         return self.demosaic_raw()

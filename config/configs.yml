@@ -81,6 +81,10 @@ yuv_conversion_format:
   isEnable: False
   conv_type: '444'
 
+ldci:
+  isEnable: False
+  clip_limit: 1
+  wind: 16
 
 2d_noise_reduction:
   isEnable: False 
