@@ -10,6 +10,7 @@ from modules.digital_gain import DigitalGain as DG
 from modules.lens_shading_correction import LensShadingCorrection as LSC
 from modules.bayer_noise_reduction import BayerNoiseReduction as BNR
 from modules.black_level_correction import BlackLevelCorrection as BLC
+from modules.oecf import OECF
 from modules.white_balance import WhiteBalance as WB
 from modules.gamma_correction import GammaCorrection as GC
 from modules.tone_mapping import ToneMapping as TM
@@ -21,7 +22,7 @@ from modules.noise_reduction_2d import NoiseReduction2d as NR2D
 from modules.sharpen import Sharpening as SHARP
 
 
-raw_path = './in_frames/normal/ColorCheckerRaw_100DPs_ISO100_2592x1536_12bits_RGGB.raw'
+raw_path = './in_frames/normal/ColorChecker_2592x1536_12bits_RGGB.raw'
 config_path = './config/configs.yml'
 inFile = Path(raw_path).stem
 outFile = "Out_" + inFile
@@ -48,6 +49,7 @@ parm_dga = c_yaml['digital_gain']
 parm_lsc = c_yaml['lens_shading_correction']
 parm_bnr = c_yaml['bayer_noise_reduction']
 parm_blc = c_yaml['black_level_correction']
+parm_oec = c_yaml['OECF']
 parm_wbc = c_yaml['white_balance']
 parm_gmm = c_yaml['pre_gamma']
 parm_tmp = c_yaml['tone_mapping']
@@ -66,63 +68,67 @@ raw = np.fromfile(raw_path, dtype=np.uint16).reshape((height, width))
 
 print(50*'-' + '\nLoading RAW Image Done......\n')
 
-# 1 Dead pixels correction (1)
+#  Dead pixels correction
 dpc = DPC(raw, sensor_info, parm_dpc)
 dpc_raw = dpc.execute()
 
-# 2  HDR stitching
+#   HDR stitching
 hdr_st = HDRS(dpc_raw, sensor_info, parm_hdr)
 hdr_raw = hdr_st.execute()
 
-# 3 Digital Gain
+#  Digital Gain
 dga = DG(hdr_raw, sensor_info, parm_dga)
 dga_raw = dga.execute()
 
-# 4 Lens shading correction
+#  Lens shading correction
 lsc = LSC(dga_raw, sensor_info, parm_lsc)
 lsc_raw = lsc.execute()
 
-# 5 Bayer noise reduction
+#  Bayer noise reduction
 bnr = BNR(lsc_raw, sensor_info, parm_bnr)
 bnr_raw = bnr.execute()
 
-# 6 Black level correction
+#  Black level correction
 blc = BLC(bnr_raw, sensor_info, parm_blc)
 blc_raw = blc.execute()
 
-# 7 White balancing
-wb = WB(blc_raw, sensor_info, parm_wbc)
+#  OECF
+oecf = OECF(blc_raw, sensor_info, parm_oec)
+oecf_raw = oecf.execute()
+
+#  White balancing
+wb = WB(oecf_raw, sensor_info, parm_wbc)
 wb_raw = wb.execute()
 
-# 8 Tone mapping
+#  Tone mapping
 tmap = TM(wb_raw, sensor_info, parm_tmp)
 tmap_img = tmap.execute()
 
-# 9 CFA demosaicing
+#  CFA demosaicing
 cfa_inter = CFA_I(tmap_img, sensor_info, parm_dem)
 demos_img = cfa_inter.execute()
 
-# 10 Color correction matrix
+#  Color correction matrix
 ccm = CCM(demos_img, sensor_info, parm_ccm)
 ccm_img = ccm.execute()
 
-# 11 Gamma
+#  Gamma
 gc = GC(demos_img, sensor_info, parm_gmc)
 gamma_raw = gc.execute()
 
-# 12 Color space conversion
+#  Color space conversion
 csc = CSC(gamma_raw, sensor_info, parm_csc)
 csc_img = csc.execute()
 
-# 13 YUV saving format 444, 422 etc
+#  YUV saving format 444, 422 etc
 yuv = YUV_C(csc_img, sensor_info, parm_yuv, inFile, parm_csc)
 yuv_conv = yuv.execute()
 
-# 14 2d noise reduction
+#  2d noise reduction
 nr2d = NR2D(csc_img, sensor_info, parm_csc)
 nr2d_img = nr2d.execute()
 
-# 15 Sharpening
+#  Sharpening
 sharp = SHARP(nr2d_img, sensor_info, parm_sha)
 sharp_img = sharp.execute()
 
