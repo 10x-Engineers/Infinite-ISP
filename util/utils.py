@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import warnings
 
 
 def introduce_defect(img, total_defective_pixels, padding):
@@ -43,5 +44,38 @@ def introduce_defect(img, total_defective_pixels, padding):
             padded_img[random_row, random_col] = defect_val
             total_defective_pixels-=1
     
-    return padded_img, orig_val    
+    return padded_img, orig_val
+
+def gaussKernRAW(N, stdDev, stride):
+    """
+    This function takes in size, standard deviation and spatial stride required for adjacet weights to output a gaussian kernel of size NxN
+
+    Parameters
+    ----------
+    N:      size of gaussian kernel, odd
+    stdDev: standard deviation of the gaussian kernel
+    stride: spatial stride between to be considered for adjacent gaussian weights
     
+    Returns
+    -------
+    outKern: an output gaussian kernel of size NxN
+    """
+
+    if N%2 == 0:
+        warnings.warn('kernel size (N) cannot be even, setting it as odd value')
+        N = N + 1
+
+    if N <= 0:
+        warnings.warn('kernel size (N) cannot be <= zero, setting it as 3')
+        N = 3
+        
+    outKern = np.zeros((N,N), dtype=np.float32)
+
+    for i in range(0,N):
+        for j in range (0,N):
+            outKern[i,j] = np.exp(-1 * ((stride*(i - ((N-1)/2)))**2 + (stride*(j - ((N-1)/2)))**2) / (2 * (stdDev**2)))
+        
+    sumKern = np.sum(outKern)
+    outKern[0:N:1, 0:N:1] = outKern[0:N:1, 0:N:1] / sumKern
+
+    return outKern    

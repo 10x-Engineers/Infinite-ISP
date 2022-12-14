@@ -71,44 +71,41 @@ raw = np.fromfile(raw_path, dtype=np.uint16).reshape((height, width))
 
 print(50*'-' + '\nLoading RAW Image Done......\n')
 
-#  Dead pixels correction
+# 1 Dead pixels correction
 dpc = DPC(raw, sensor_info, parm_dpc)
 dpc_raw = dpc.execute()
 
-#   HDR stitching
+# 2 HDR stitching
+# TODO figure out where in pipeline HDR stitching will happen and fix this numbering accordingly
 hdr_st = HDRS(dpc_raw, sensor_info, parm_hdr)
 hdr_raw = hdr_st.execute()
 
-#  Digital Gain
-dga = DG(hdr_raw, sensor_info, parm_dga)
-dga_raw = dga.execute()
-
-#  Lens shading correction
-lsc = LSC(dga_raw, sensor_info, parm_lsc)
-lsc_raw = lsc.execute()
-
-#  Bayer noise reduction
-bnr = BNR(lsc_raw, sensor_info, parm_bnr)
-bnr_raw = bnr.execute()
-
-#  Black level correction
-blc = BLC(bnr_raw, sensor_info, parm_blc)
+# 3 Black level correction
+blc = BLC(hdr_raw, sensor_info, parm_blc)
 blc_raw = blc.execute()
 
-#  OECF
+# 4 OECF
 oecf = OECF(blc_raw, sensor_info, parm_oec)
 oecf_raw = oecf.execute()
 
-#  White balancing
-wb = WB(oecf_raw, sensor_info, parm_wbc)
+# 5 Digital Gain
+dga = DG(oecf_raw, sensor_info, parm_dga)
+dga_raw = dga.execute()
+
+# 6 Lens shading correction
+lsc = LSC(dga_raw, sensor_info, parm_lsc)
+lsc_raw = lsc.execute()
+
+# 7 Bayer noise reduction
+bnr = BNR(lsc_raw, sensor_info, parm_bnr)
+bnr_raw = bnr.execute() 
+
+# 8 White balancing
+wb = WB(bnr_raw, sensor_info, parm_wbc)
 wb_raw = wb.execute()
 
-#  Tone mapping
-tmap = TM(wb_raw, sensor_info, parm_tmp)
-tmap_img = tmap.execute()
-
-#  CFA demosaicing
-cfa_inter = CFA_I(tmap_img, sensor_info, parm_dem)
+# 9 CFA demosaicing
+cfa_inter = CFA_I(wb_raw, sensor_info, parm_dem)
 demos_img = cfa_inter.execute()
 
 awb = AWB(demos_img, sensor_info, parm_wbc, parm_awb)
@@ -122,7 +119,7 @@ ccm_img = ccm.execute()
 gc = GC(ccm_img, sensor_info, parm_gmc)
 gamma_raw = gc.execute()
 
-#  Color space conversion
+# 12 Color space conversion
 csc = CSC(gamma_raw, sensor_info, parm_csc)
 csc_img = csc.execute()
 
@@ -130,20 +127,20 @@ csc_img = csc.execute()
 ldci = LDCI(csc_img, sensor_info, parm_ldci)
 ldci_img = ldci.execute()
 
-#  YUV saving format 444, 422 etc
-yuv = YUV_C(ldci_img, sensor_info, parm_yuv, inFile, parm_csc)
-yuv_conv = yuv.execute()
-
-#  2d noise reduction
-nr2d = NR2D(yuv_conv, sensor_info, parm_csc)
-nr2d_img = nr2d.execute()
-
-#  Sharpening
-sharp = SHARP(nr2d_img, sensor_info, parm_sha)
+# 14 Sharpening
+sharp = SHARP(ldci_img, sensor_info, parm_sha)
 sharp_img = sharp.execute()
 
+# 15 2d noise reduction
+nr2d = NR2D(sharp_img, sensor_info, parm_csc)
+nr2d_img = nr2d.execute()
+
+# 16 YUV saving format 444, 422 etc
+yuv = YUV_C(nr2d_img, sensor_info, parm_yuv, inFile, parm_csc)
+yuv_conv = yuv.execute()
+
 #only to view image if csc is off it does nothing
-out_img = csc.yuv_to_rgb(sharp_img)
+out_img = csc.yuv_to_rgb(nr2d_img)
 
 # plt.imshow(sharp_img)
 # plt.show()

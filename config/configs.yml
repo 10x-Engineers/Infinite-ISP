@@ -7,7 +7,7 @@ sensor_info:
   hdr: False
 
 dead_pixel_correction: 
-  isEnable: false
+  isEnable: False
   dp_threshold: 80
   isDebug: True
 
@@ -23,6 +23,13 @@ lens_shading_correction:
 
 bayer_noise_reduction: 
   isEnable: False
+  filt_window: 9
+  r_stdDevS: 1
+  r_stdDevR: 0.1
+  g_stdDevS: 1
+  g_stdDevR: 0.08
+  b_stdDevS: 1
+  b_stdDevR: 0.1
 
 black_level_correction: 
   isEnable: True
