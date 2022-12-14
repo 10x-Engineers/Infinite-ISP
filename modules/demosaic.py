@@ -7,7 +7,7 @@ class CFAInterpolation:
 
     def __init__(self, img, sensor_info, parm_dem):
         self.img = img
-        self.enable = parm_dem['isEnable']
+        #self.enable = parm_dem['isEnable']
         self.bayer = sensor_info['bayer_pattern']
         self.bitdepth = sensor_info['bitdep']
 
@@ -125,9 +125,9 @@ class CFAInterpolation:
         return demos_out
 
     def execute(self):
-        print('CFA interpolation (demosaicing) = ' + str(self.enable))
+        print('CFA interpolation (default) = True')
 
-        if self.enable == False:
-            return self.img
-        elif self.enable == True:
-            return self.apply_cfa()
+        # if self.enable == False:
+        #     return self.img
+        # elif self.enable == True:
+        return self.apply_cfa()

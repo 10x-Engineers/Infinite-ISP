@@ -1,14 +1,16 @@
 import numpy as np
-
+from tqdm import tqdm
 
 class DeadPixelCorrection:
     'Dead Pixel Correction'
 
-    def __init__(self, img, sensor_info, parm_dpc):
+    def __init__(self, img, sensor_info, parm_dpc, platform):
         self.img = img
         self.enable = parm_dpc['isEnable']
         self.sensor_info = sensor_info
         self.parm_dpc = parm_dpc
+        self.is_progress = platform['disable_progress_bar']
+        self.is_leave = platform['leave_pbar_string']
 
     def padding(self):
         """Return a mirror padded copy of image."""
@@ -30,7 +32,7 @@ class DeadPixelCorrection:
         corrected_pv_count = 0
 
         # Loop over the padded image to ensure that each pixel is tested.
-        for y in range(img_padded.shape[0] - 4):
+        for y in tqdm(range(img_padded.shape[0] - 4), disable=self.is_progress, leave=self.is_leave):
             for x in range(img_padded.shape[1] - 4):
                 top_left = img_padded[y, x]
                 top_mid = img_padded[y, x + 2]

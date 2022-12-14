@@ -4,13 +4,16 @@
 #------------------------------------------------------------
 
 import numpy as np
+from tqdm import tqdm
 
 class NoiseReduction2d:
-    def __init__(self, img, sensor_info, parm_2dnr):
+    def __init__(self, img, sensor_info, parm_2dnr, platform):
         self.img = img
         self.enable = parm_2dnr['isEnable']
         self.sensor_info = sensor_info
         self.parm_2dnr = parm_2dnr
+        self.is_progress = platform['disable_progress_bar']
+        self.is_leave = platform['leave_pbar_string']
 
     def get_weights(self):
         # h is the strength parameter to assign weights to the similar pixels in the image
@@ -61,7 +64,7 @@ class NoiseReduction2d:
         weights_LUT = self.get_weights()
 
 
-        for i in range(window_size):
+        for i in tqdm(range(window_size),  disable=self.is_progress, leave=self.is_leave ):
             for j in range(window_size):
                 # Creating arrays starting from pixels according to the search window --
                 # There will N = search_window*search_window stacked arrays of input image size

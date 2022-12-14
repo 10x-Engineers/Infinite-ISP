@@ -4,7 +4,7 @@ class AutoWhiteBalance:
 
     def __init__(self, img, sensor_info, parm_wbc, parm_awb):
         
-        self.img = np.float32(img)
+        self.img = img
         self.enable = parm_wbc['isEnable']
         self.auto = parm_wbc['isAuto']
         self.sensor_info = sensor_info
@@ -18,7 +18,7 @@ class AutoWhiteBalance:
         # Gray world algorithm calculates white balance (G/R and G/B)
         # by average values of RGB channels
 
-        return np.mean(self.img, axis=(0,1))
+        return np.mean(self.flatten_img, axis=0)
 
     def apply_norm_2_gray_world(self):
         'Norm 2 Gray World White Balance'
@@ -26,7 +26,7 @@ class AutoWhiteBalance:
         # by average values of RGB channels. Average values for each channel 
         # are calculated by norm-2
 
-        return np.linalg.norm(self.img, axis=(0,1))
+        return np.linalg.norm(self.flatten_img, axis=0)
 
     def apply_pca_illuminant_estimation(self, pixel_percentage):
         'PCA Illuminant Estimation'
@@ -37,7 +37,7 @@ class AutoWhiteBalance:
 
         
         # Img flattened to Nx3 numpy array where N = heightxwidth to get only the color dist
-        flat_img = self.img.flatten().reshape(-1,3)
+        flat_img = self.flatten_img #.flatten().reshape(-1,3)
         size = len(flat_img)
 
         # mean_vector is the direction vector for mean RGB obtained by dividing mean RBG vector by its magnitude.
@@ -72,6 +72,10 @@ class AutoWhiteBalance:
 
     def apply_white_balance_gain(self):
         
+        # Removed overexposed and underexposed pixels for wb gain calculation
+        x = np.sum(np.where((self.img<5)|(self.img>250), 1, 0), axis=2)
+        self.flatten_img = self.img[x==0]
+
         # estimated illuminant RBG is obtained from selected algorithm
         if self.algorithm == 'norm_2':
             rgb = self.apply_norm_2_gray_world()
@@ -81,10 +85,15 @@ class AutoWhiteBalance:
         else:
             rgb = self.apply_gray_world()
 
+        self.img = np.float32(self.img)
         # white balance gains G/R and G/B are calculated from RGB returned from AWB Algorithm
         rgain = rgb[1]/rgb[0]
         bgain = rgb[1]/rgb[2]
 
+        #Check if r_gain and b_gain go out of bound
+        rgain = 1 if rgain <= 0 else rgain
+        bgain = 1 if bgain <= 0 else bgain
+        
         self.img[:, :, 0] *= rgain
         self.img[:, :, 2] *= bgain
 

@@ -12,19 +12,19 @@ class ColorSpaceConv:
 
     def __init__(self, img, sensor_info, parm_csc):
         self.img = img
-        self.enable = parm_csc['isEnable']
+        #self.enable = parm_csc['isEnable']
         self.sensor_info = sensor_info
         self.parm_csc = parm_csc
         self.conv_std = self.parm_csc['conv_standard']
         self.conv_type = self.parm_csc['conv_type']
 
     def execute(self):
-        print('Color Space Conversion = ' + str(self.enable))
+        print('Color Space Conversion (default) = True' )
 
-        if self.enable == False:
-            return self.img
-        else:
-            return self.rgb_to_yuv()
+        # if self.enable == False:
+        #     return self.img
+        # else:
+        return self.rgb_to_yuv()
 
     def rgb_to_yuv(self):
 
@@ -118,19 +118,21 @@ class ColorSpaceConv:
         self.yuv_img = yuv_img
 
         #do nothing if yuv module was off  
-        if self.enable == True:
+        #if self.enable == True:
 
-            if self.conv_type == 2:
+        if self.conv_type == 2:
 
-                # digital
-                return self.yuv_to_rgb_8bit()
+            # digital
+            return self.yuv_to_rgb_8bit()
 
-            elif self.conv_type == 1:
+        elif self.conv_type == 1:
 
-                #for analog conv
-                return self.yuv_to_rgb_analog()
-        else:
-            return self.yuv_img
+            #for analog conv
+            return self.yuv_to_rgb_analog()
+        
+        # else:
+        #     return self.yuv_img
+        
     def yuv_to_rgb_8bit(self):
         
         #make nx3 2d matrix of image

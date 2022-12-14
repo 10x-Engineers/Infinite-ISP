@@ -1,14 +1,16 @@
 import numpy as np
 from scipy import ndimage
 import warnings
-
+from tqdm import tqdm
 class BayerNoiseReduction:
     'Noise Reduction in Bayer domain'
-    def __init__(self, img, sensor_info, parm_bnr):
+    def __init__(self, img, sensor_info, parm_bnr, platform):
         self.img = img
         self.enable = parm_bnr['isEnable']
         self.sensor_info = sensor_info
         self.parm_bnr = parm_bnr
+        self.is_progress = platform['disable_progress_bar']
+        self.is_leave = platform['leave_pbar_string']        
 
     def gauss_kern_raw(self, N, stdDev, stride):
         if N%2 == 0:
@@ -64,7 +66,7 @@ class BayerNoiseReduction:
         
         filt_out = np.zeros(in_img.shape, dtype=np.float32)
 
-        for i in range(kern_arm, np.size(in_img, 0) + kern_arm):
+        for i in tqdm(range(kern_arm, np.size(in_img, 0) + kern_arm), disable=self.is_progress, leave=self.is_leave):
             for j in range(kern_arm, np.size(in_img, 1) + kern_arm):
                 guide_img_ext_center_pix = guide_img_ext[i, j]
                 guide_img_ext_filt_window = guide_img_ext[i-kern_arm:i+kern_arm +1, j-kern_arm:j+kern_arm +1]

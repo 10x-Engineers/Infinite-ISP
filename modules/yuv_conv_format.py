@@ -14,7 +14,7 @@ class YUVConvFormat:
     def __init__(self, img, sensor_info, parm_yuv, inputfile_name, parm_csc):
         self.img = img
         self.enable = parm_yuv['isEnable']
-        self.is_csc_enable = parm_csc['isEnable']
+        #self.is_csc_enable = parm_csc['isEnable']
         self.sensor_info = sensor_info
         self.param_yuv = parm_yuv
         self.infile = inputfile_name
@@ -44,7 +44,7 @@ class YUVConvFormat:
     def execute(self):
         print('YUV conversion format '+ self.param_yuv['conv_type'] + ' = ' + str(self.enable))
 
-        if (self.enable and self.is_csc_enable) == False:
+        if (self.enable) == False:
             return self.img
         else:
             return self.convert2yuv_format()

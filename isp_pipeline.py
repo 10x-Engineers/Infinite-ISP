@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 import yaml
+import rawpy
 from pathlib import Path
 from datetime import datetime
 from modules.dead_pixel_correction import DeadPixelCorrection as DPC
@@ -23,18 +24,20 @@ from modules.noise_reduction_2d import NoiseReduction2d as NR2D
 from modules.scale import Scale 
 from modules.crop import Crop 
 from modules.sharpen import Sharpening as SHARP
+from modules.auto_exposure import AutoExposure as AE
 
-
-raw_path = './in_frames/normal/ColorChecker_2592x1536_12bits_RGGB.raw'
+#Path to configuration file
 config_path = './config/configs.yml'
-inFile = Path(raw_path).stem
-outFile = "Out_" + inFile
 
 #not to jumble any tags
 yaml.preserve_quotes = True
 
 with open(config_path, 'r') as f:
     c_yaml = yaml.safe_load(f)
+
+# Extract workspace info
+platform = c_yaml['platform']
+raw_file = platform['filename']
 
 # Extract basic sensor info
 sensor_info = c_yaml['sensor_info']
@@ -56,6 +59,7 @@ parm_oec = c_yaml['OECF']
 parm_wbc = c_yaml['white_balance']
 parm_awb = c_yaml['auto_white_balance']
 parm_gmm = c_yaml['pre_gamma']
+parm_ae  = c_yaml['auto_exposure']
 parm_tmp = c_yaml['tone_mapping']
 parm_dem = c_yaml['demosaic']
 parm_ccm = c_yaml['color_correction_matrix']
@@ -69,9 +73,20 @@ parm_sha = c_yaml['sharpen']
 parm_jpg = c_yaml['jpeg_conversion']
 parm_yuv = c_yaml['yuv_conversion_format']
 
+# Get the path to the inputfile
+raw_folder = './in_frames/normal/' 
+path_object =  Path(raw_folder, raw_file)
+raw_path = str(path_object.resolve())
+inFile = path_object.stem
+outFile = "Out_" + inFile
+
 # Load Raw
-raw = np.fromfile(raw_path, dtype=np.uint16).reshape((height, width))
-# raw = np.float32(raw) / np.power(2,16)
+if path_object.suffix == '.raw':
+    raw = np.fromfile(raw_path, dtype=np.uint16).reshape((height, width))
+    # raw = np.float32(raw) / np.power(2,16)
+else:
+    img = rawpy.imread(raw_path)
+    raw = img.raw_image
 
 print(50*'-' + '\nLoading RAW Image Done......\n')
 
@@ -81,7 +96,7 @@ cropped_img = crop.execute()
 c_yaml["sensor_info"] = sensor_info
 
 #  Dead pixels correction
-dpc = DPC(cropped_img, sensor_info, parm_dpc)
+dpc = DPC(cropped_img, sensor_info, parm_dpc, platform)
 dpc_raw = dpc.execute()
 
 # 2 HDR stitching
@@ -106,7 +121,7 @@ lsc = LSC(dga_raw, sensor_info, parm_lsc)
 lsc_raw = lsc.execute()
 
 # 7 Bayer noise reduction
-bnr = BNR(lsc_raw, sensor_info, parm_bnr)
+bnr = BNR(lsc_raw, sensor_info, parm_bnr, platform)
 bnr_raw = bnr.execute()
 
 # 8 White balancing
@@ -117,6 +132,7 @@ wb_raw = wb.execute()
 cfa_inter = CFA_I(wb_raw, sensor_info, parm_dem)
 demos_img = cfa_inter.execute()
 
+# Auto White Balance
 awb = AWB(demos_img, sensor_info, parm_wbc, parm_awb)
 awb_img = awb.execute()
 
@@ -124,12 +140,16 @@ awb_img = awb.execute()
 ccm = CCM(awb_img, sensor_info, parm_ccm)
 ccm_img = ccm.execute()
 
-# 11 Gamma
+#  Gamma
 gc = GC(ccm_img, sensor_info, parm_gmc)
 gamma_raw = gc.execute()
 
-# 12 Color space conversion
-csc = CSC(gamma_raw, sensor_info, parm_csc)
+# Auto-Exposure
+ae = AE(gamma_raw, sensor_info, parm_ae, oecf_raw, dga, lsc, bnr, wb, cfa_inter, awb,  ccm, gc)
+ae_img = ae.execute()
+
+#  Color space conversion
+csc = CSC(ae_img, sensor_info, parm_csc)
 csc_img = csc.execute()
 
 # Local Dynamic Contrast Improvement
@@ -141,7 +161,7 @@ sharp = SHARP(ldci_img, sensor_info, parm_sha)
 sharp_img = sharp.execute()
 
 # 15 2d noise reduction
-nr2d = NR2D(sharp_img, sensor_info, parm_2dn)
+nr2d = NR2D(sharp_img, sensor_info, parm_2dn, platform)
 nr2d_img = nr2d.execute()
 
 # Scaling
