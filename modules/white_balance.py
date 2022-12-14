@@ -9,8 +9,34 @@ class WhiteBalance:
         self.enable = parm_wbc['isEnable']
         self.sensor_info = sensor_info
         self.parm_wbc = parm_wbc
-        
+    
+    def apply_wb_parameters(self):
 
+        #get config params
+        redgain = self.parm_wbc['r_gain']
+        bluegain = self.parm_wbc['b_gain']
+        self.bayer = self.sensor_info['bayer_pattern']
+        self.bpp = self.sensor_info['bitdep']
+        self.raw = np.float32(self.img)
+
+        if self.bayer == 'rggb':
+            self.raw[::2, ::2] = self.raw[::2, ::2] * redgain
+            self.raw[1::2, 1::2] = self.raw[1::2, 1::2] * bluegain
+        elif self.bayer == 'bggr':
+            self.raw[::2, ::2] = self.raw[::2, ::2] * bluegain
+            self.raw[1::2, 1::2] = self.raw[1::2, 1::2] * redgain
+        elif self.bayer == 'grbg':
+            self.raw[1::2, ::2] = self.raw[1::2, ::2] * bluegain
+            self.raw[::2, 1::2] = self.raw[::2, 1::2] * redgain
+        elif self.bayer == 'gbrg':
+            self.raw[1::2, ::2] = self.raw[1::2, ::2] * redgain
+            self.raw[::2, 1::2] = self.raw[::2, 1::2] * bluegain
+
+        raw_whitebal = np.uint16(np.clip(self.raw, 0, (2**self.bpp)-1))
+
+        return raw_whitebal
+
+    # This function should be a part of auto white balancing or the tuning tool
     def apply_grayworld(self):
 
         # raw: raw input image
@@ -65,7 +91,7 @@ class WhiteBalance:
         if self.enable == False:
             return self.raw
 
-        return self.apply_grayworld()
+        return self.apply_wb_parameters()
 
     
         

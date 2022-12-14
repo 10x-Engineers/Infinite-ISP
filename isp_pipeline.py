@@ -1,3 +1,4 @@
+from typing_extensions import Self
 from matplotlib import pyplot as plt
 import numpy as np
 import yaml
@@ -5,6 +6,7 @@ from pathlib import Path
 from datetime import datetime
 from modules.dead_pixel_correction import DeadPixelCorrection as DPC
 from modules.hdr_stitching import HdrStitching as HDRS
+from modules.digital_gain import DigitalGain as DG
 from modules.lens_shading_correction import LensShadingCorrection as LSC
 from modules.bayer_noise_reduction import BayerNoiseReduction as BNR
 from modules.black_level_correction import BlackLevelCorrection as BLC
@@ -14,14 +16,18 @@ from modules.tone_mapping import ToneMapping as TM
 from modules.demosaic import CFAInterpolation as CFA_I
 from modules.color_correction_matrix import ColorCorrectionMatrix as CCM
 from modules.color_space_conversion import ColorSpaceConv as CSC
+from modules.yuv_conv_format import YUVConvFormat as YUV_C
 from modules.noise_reduction_2d import NoiseReduction2d as NR2D
 from modules.sharpen import Sharpening as SHARP
 
 
-raw_path = './in_frames/normal/ColorCheckerRAW_1920x1080_12bit_BGGR.RAW'
+raw_path = './in_frames/normal/ColorChecker_2592x1536_12bits_RGGB.RAW'
 config_path = './config/configs.yml'
 inFile = Path(raw_path).stem
 outFile = "Out_" + inFile
+
+#not to jumble any tags
+yaml.preserve_quotes = True
 
 with open(config_path, 'r') as f:
     c_yaml = yaml.safe_load(f)
@@ -38,6 +44,7 @@ bpp = sensor_info['bitdep']
 # Get isp module params
 parm_dpc = c_yaml['dead_pixel_correction']
 parm_hdr = c_yaml['hdr_stitching']
+parm_dga = c_yaml['digital_gain']
 parm_lsc = c_yaml['lens_shading_correction']
 parm_bnr = c_yaml['bayer_noise_reduction']
 parm_blc = c_yaml['black_level_correction']
@@ -51,6 +58,7 @@ parm_csc = c_yaml['color_space_conversion']
 parm_2dn = c_yaml['2d_noise_reduction']
 parm_sha = c_yaml['sharpen']
 parm_jpg = c_yaml['jpeg_conversion']
+parm_yuv = c_yaml['yuv_conversion_format']
 
 # Load Raw
 raw = np.fromfile(raw_path, dtype=np.uint16).reshape((height, width))
@@ -58,62 +66,77 @@ raw = np.fromfile(raw_path, dtype=np.uint16).reshape((height, width))
 
 print(50*'-' + '\nLoading RAW Image Done......\n')
 
-# Dead pixels correction (1)
+# 1 Dead pixels correction (1)
 dpc = DPC(raw, sensor_info, parm_dpc)
 dpc_raw = dpc.execute()
 
-# HDR stitching (2)
+# 2  HDR stitching
 hdr_st = HDRS(dpc_raw, sensor_info, parm_hdr)
 hdr_raw = hdr_st.execute()
 
-# Lens shading correction (3)
-lsc = LSC(hdr_raw, sensor_info, parm_lsc)
+# 3 Digital Gain
+dga = DG(hdr_raw, sensor_info, parm_dga)
+dga_raw = dga.execute()
+
+# 4 Lens shading correction
+lsc = LSC(dga_raw, sensor_info, parm_lsc)
 lsc_raw = lsc.execute()
 
-# Bayer noise reduction (4)
+# 5 Bayer noise reduction
 bnr = BNR(lsc_raw, sensor_info, parm_bnr)
 bnr_raw = bnr.execute()
 
-# Black level correction (5)
+# 6 Black level correction
 blc = BLC(bnr_raw, sensor_info, parm_blc)
 blc_raw = blc.execute()
 
-# White balancing (6)
+# 7 White balancing
 wb = WB(blc_raw, sensor_info, parm_wbc)
 wb_raw = wb.execute()
 
-# Gamma (7)
-gc = GC(wb_raw, sensor_info, parm_gmm)
-gamma_raw = gc.execute()
-
-# Tone mapping (8)
-tmap = TM(gamma_raw, sensor_info, parm_tmp)
+# 8 Tone mapping
+tmap = TM(wb_raw, sensor_info, parm_tmp)
 tmap_img = tmap.execute()
 
-# CFA demosaicing (9)
+# 9 CFA demosaicing
 cfa_inter = CFA_I(tmap_img, sensor_info, parm_dem)
 demos_img = cfa_inter.execute()
 
-# Color correction matrix (10)
+# 10 Color correction matrix
 ccm = CCM(demos_img, sensor_info, parm_ccm)
 ccm_img = ccm.execute()
 
-# Color space conversion
-csc = CSC(ccm_img, sensor_info, parm_csc)
+# 11 Gamma
+gc = GC(demos_img, sensor_info, parm_gmc)
+gamma_raw = gc.execute()
+
+# 12 Color space conversion
+csc = CSC(gamma_raw, sensor_info, parm_csc)
 csc_img = csc.execute()
 
-# 2d noise reduction
+# 13 YUV saving format 444, 422 etc
+yuv = YUV_C(csc_img, sensor_info, parm_yuv, inFile, parm_csc)
+yuv_conv = yuv.execute()
+
+# 14 2d noise reduction
 nr2d = NR2D(csc_img, sensor_info, parm_csc)
 nr2d_img = nr2d.execute()
 
-# Sharpening
+# 15 Sharpening
 sharp = SHARP(nr2d_img, sensor_info, parm_sha)
 sharp_img = sharp.execute()
 
+#only to view image if csc is off it does nothing
+out_img = csc.yuv_to_rgb(sharp_img)
 
 # plt.imshow(sharp_img)
 # plt.show()
 
 print(50*'-' + '\n')
 dt_string = datetime.now().strftime("_%Y%m%d_%H%M%S")
-plt.imsave("./out_frames/" + outFile + dt_string + ".png", sharp_img)
+
+#save config
+with open("./out_frames/" + outFile + dt_string+'.yaml', 'w') as file:
+    yaml.dump(c_yaml, file, sort_keys= False)
+#save image
+plt.imsave("./out_frames/" + outFile + dt_string + ".png", out_img)
