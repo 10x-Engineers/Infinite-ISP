@@ -20,6 +20,8 @@ from modules.color_space_conversion import ColorSpaceConv as CSC
 from modules.ldci import LDCI as LDCI
 from modules.yuv_conv_format import YUVConvFormat as YUV_C
 from modules.noise_reduction_2d import NoiseReduction2d as NR2D
+from modules.scale import Scale 
+from modules.crop import Crop 
 from modules.sharpen import Sharpening as SHARP
 
 
@@ -61,6 +63,8 @@ parm_gmc = c_yaml['gamma_correction']
 parm_csc = c_yaml['color_space_conversion']
 parm_ldci = c_yaml['ldci']
 parm_2dn = c_yaml['2d_noise_reduction']
+parm_sca = c_yaml['scale']
+parm_cro = c_yaml['crop']
 parm_sha = c_yaml['sharpen']
 parm_jpg = c_yaml['jpeg_conversion']
 parm_yuv = c_yaml['yuv_conversion_format']
@@ -71,8 +75,13 @@ raw = np.fromfile(raw_path, dtype=np.uint16).reshape((height, width))
 
 print(50*'-' + '\nLoading RAW Image Done......\n')
 
-# 1 Dead pixels correction
-dpc = DPC(raw, sensor_info, parm_dpc)
+# Cropping
+crop = Crop(raw, sensor_info, parm_cro)
+cropped_img = crop.execute()
+c_yaml["sensor_info"] = sensor_info
+
+#  Dead pixels correction
+dpc = DPC(cropped_img, sensor_info, parm_dpc)
 dpc_raw = dpc.execute()
 
 # 2 HDR stitching
@@ -135,12 +144,16 @@ sharp_img = sharp.execute()
 nr2d = NR2D(sharp_img, sensor_info, parm_2dn)
 nr2d_img = nr2d.execute()
 
+# Scaling
+scale = Scale(nr2d_img, sensor_info, parm_sca)
+scaled_img = scale.execute()
+
 # 16 YUV saving format 444, 422 etc
 yuv = YUV_C(nr2d_img, sensor_info, parm_yuv, inFile, parm_csc)
 yuv_conv = yuv.execute()
 
 #only to view image if csc is off it does nothing
-out_img = csc.yuv_to_rgb(nr2d_img)
+out_img = csc.yuv_to_rgb(scaled_img)
 
 # plt.imshow(sharp_img)
 # plt.show()

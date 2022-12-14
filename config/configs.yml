@@ -106,6 +106,23 @@ ldci:
   window_size: 21
   patch_size: 5
   h: 15
+  
+scale:
+  isEnable: False
+  isDebug: True
+  new_width: 1920
+  new_height: 1080   
+  isHardware: True
+  # Nearest_Neighbor # Bilinear
+  Algo: "Nearest_Neighbor"
+  upscale_method: "Nearest_Neighbor"
+  downscale_method: "Bilinear"  
+
+crop:
+  isEnable: False
+  isDebug: False
+  new_width: 1280
+  new_height: 720   
 
 sharpen:
   isEnable: False

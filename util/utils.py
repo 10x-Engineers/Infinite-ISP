@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import warnings
+from scipy.signal import correlate2d
 
 
 def introduce_defect(img, total_defective_pixels, padding):
@@ -79,3 +80,33 @@ def gaussKernRAW(N, stdDev, stride):
     outKern[0:N:1, 0:N:1] = outKern[0:N:1, 0:N:1] / sumKern
 
     return outKern    
+
+def crop(img, rows_to_crop=0, cols_to_crop=0):
+        
+    """
+    Crop 2D array.
+    Parameter:
+    ---------
+    img: image (2D array) to be cropped.
+    rows_to_crop: Number of rows to crop. If it is an even integer, 
+                    equal number of rows are cropped from either side of the image. 
+                    Otherwise the image is cropped from the extreme right/bottom.
+    cols_to_crop: Number of columns to crop. Works exactly as rows_to_crop.
+    
+    Output: cropped image
+    """
+    
+    if rows_to_crop:
+        if rows_to_crop%2==0:
+            img = img[rows_to_crop//2:-rows_to_crop//2, :]
+        else:
+            img = img[0:-1, :]
+    if cols_to_crop:         
+        if cols_to_crop%2==0:
+            img = img[:, cols_to_crop//2:-cols_to_crop//2]
+        else:
+            img = img[:, 0:-1] 
+    return img
+
+def stride_convolve2d(matrix, kernel):
+    return correlate2d(matrix, kernel, mode="valid")[::kernel.shape[0], ::kernel.shape[1]]        
