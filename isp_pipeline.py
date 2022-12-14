@@ -1,4 +1,3 @@
-from typing_extensions import Self
 from matplotlib import pyplot as plt
 import numpy as np
 import yaml
@@ -17,6 +16,7 @@ from modules.tone_mapping import ToneMapping as TM
 from modules.demosaic import CFAInterpolation as CFA_I
 from modules.color_correction_matrix import ColorCorrectionMatrix as CCM
 from modules.color_space_conversion import ColorSpaceConv as CSC
+from modules.ldci import LDCI as LDCI
 from modules.yuv_conv_format import YUVConvFormat as YUV_C
 from modules.noise_reduction_2d import NoiseReduction2d as NR2D
 from modules.sharpen import Sharpening as SHARP
@@ -57,6 +57,7 @@ parm_dem = c_yaml['demosaic']
 parm_ccm = c_yaml['color_correction_matrix']
 parm_gmc = c_yaml['gamma_correction']
 parm_csc = c_yaml['color_space_conversion']
+parm_ldci = c_yaml['ldci']
 parm_2dn = c_yaml['2d_noise_reduction']
 parm_sha = c_yaml['sharpen']
 parm_jpg = c_yaml['jpeg_conversion']
@@ -117,15 +118,19 @@ gc = GC(demos_img, sensor_info, parm_gmc)
 gamma_raw = gc.execute()
 
 #  Color space conversion
-csc = CSC(gamma_raw, sensor_info, parm_csc)
+csc = CSC(ccm_img, sensor_info, parm_csc)
 csc_img = csc.execute()
 
+# Local Dynamic Contrast Improvement
+ldci = LDCI(csc_img, sensor_info, parm_ldci)
+ldci_img = ldci.execute()
+
 #  YUV saving format 444, 422 etc
-yuv = YUV_C(csc_img, sensor_info, parm_yuv, inFile, parm_csc)
+yuv = YUV_C(ldci_img, sensor_info, parm_yuv, inFile, parm_csc)
 yuv_conv = yuv.execute()
 
 #  2d noise reduction
-nr2d = NR2D(csc_img, sensor_info, parm_csc)
+nr2d = NR2D(yuv_conv, sensor_info, parm_csc)
 nr2d_img = nr2d.execute()
 
 #  Sharpening

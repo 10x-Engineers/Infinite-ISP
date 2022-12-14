@@ -82,7 +82,7 @@ yuv_conversion_format:
   conv_type: '444'
 
 ldci:
-  isEnable: False
+  isEnable: True
   clip_limit: 1
   wind: 16
 
