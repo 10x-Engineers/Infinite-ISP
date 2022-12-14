@@ -21,7 +21,7 @@ from modules.noise_reduction_2d import NoiseReduction2d as NR2D
 from modules.sharpen import Sharpening as SHARP
 
 
-raw_path = './in_frames/normal/ColorChecker_2592x1536_12bits_RGGB.RAW'
+raw_path = './in_frames/normal/ColorCheckerRaw_100DPs_ISO100_2592x1536_12bits_RGGB.raw'
 config_path = './config/configs.yml'
 inFile = Path(raw_path).stem
 outFile = "Out_" + inFile

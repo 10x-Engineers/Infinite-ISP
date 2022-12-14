@@ -7,8 +7,9 @@ sensor_info:
   hdr: False
 
 dead_pixel_correction: 
-  isEnable: False
-  dp_threshold: 0
+  isEnable: True
+  dp_threshold: 80
+  isDebug: True
 
 hdr_stitching: 
   isEnable: False
