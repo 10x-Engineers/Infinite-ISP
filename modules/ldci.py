@@ -1,3 +1,6 @@
+# Implementation inspired from: MATLAB &
+# Fast Open ISP Author: Qiu Jueqin (qiujueqin@gmail.com)
+
 import numpy as np
 import math
 

@@ -98,7 +98,7 @@ lsc_raw = lsc.execute()
 
 # 7 Bayer noise reduction
 bnr = BNR(lsc_raw, sensor_info, parm_bnr)
-bnr_raw = bnr.execute() 
+bnr_raw = bnr.execute()
 
 # 8 White balancing
 wb = WB(bnr_raw, sensor_info, parm_wbc)
@@ -132,7 +132,7 @@ sharp = SHARP(ldci_img, sensor_info, parm_sha)
 sharp_img = sharp.execute()
 
 # 15 2d noise reduction
-nr2d = NR2D(sharp_img, sensor_info, parm_csc)
+nr2d = NR2D(sharp_img, sensor_info, parm_2dn)
 nr2d_img = nr2d.execute()
 
 # 16 YUV saving format 444, 422 etc
