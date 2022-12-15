@@ -167,7 +167,7 @@ There are a few sample images with tuned configurations already added to the pro
 Here are the results of this pipeline compared with a market competitve ISP. 
 The outputs of our ISP are displayed on the right, with the underlying ground truths on the left.
 
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **ground truths**     &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **infinite-isp** 
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **ground truths**     &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **infinite-isp** 
 ![](assets/Indoor1.png)
 ![](assets/Outdoor1.png)
 ![](assets/Outdoor2.png)
