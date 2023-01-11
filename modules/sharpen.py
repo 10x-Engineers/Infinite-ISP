@@ -4,6 +4,7 @@
 # Author: xx-isp (ispinfinite@gmail.com)
 
 import numpy as np
+from scipy import ndimage 
 
 class Sharpening:
     def __init__(self, img, sensor_info, parm_sha):
@@ -15,7 +16,11 @@ class Sharpening:
     def execute(self):
         print('Sharpening = ' + str(self.enable))
 
-        if self.enable == False:
+        if not self.enable:
             return self.img
         else:
-            return self.img
+            luma = np.float32(self.img[:, :, 0])
+            smoothened = ndimage.gaussian_filter(luma, self.parm_sha['sharpen_sigma'])
+            sharpened = luma + ((luma - smoothened) * self.parm_sha['sharpen_strength'])
+            self.img[:, :, 0] = np.clip(sharpened, 0, 255)
+            return np.uint8(self.img)

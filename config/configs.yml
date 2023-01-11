@@ -112,7 +112,9 @@ ldci:
   wind: 16
 
 sharpen:
-  isEnable: False
+  isEnable: True
+  sharpen_sigma: 5
+  sharpen_strength: 1
 
 
 2d_noise_reduction:

@@ -7,6 +7,7 @@
 
 import numpy as np
 from tqdm import tqdm
+from scipy import ndimage
 
 class DeadPixelCorrection:
     'Dead Pixel Correction'
@@ -38,67 +39,123 @@ class DeadPixelCorrection:
         dpc_img = np.empty((height, width), np.float32)
         corrected_pv_count = 0
 
-        # Loop over the padded image to ensure that each pixel is tested.
-        for y in tqdm(range(img_padded.shape[0] - 4), disable=self.is_progress, leave=self.is_leave):
-            for x in range(img_padded.shape[1] - 4):
-                top_left = img_padded[y, x]
-                top_mid = img_padded[y, x + 2]
-                top_right = img_padded[y, x + 4]
+        fp = np.array([[1, 0, 1, 0, 1],
+                       [0, 0, 0, 0, 0],
+                       [1, 0, 0, 0, 1],
+                       [0, 0, 0, 0, 0],
+                       [1, 0, 1, 0, 1]])
 
-                left_of_center_pixel = img_padded[y + 2, x]
-                center_pixel = img_padded[y + 2, x + 2]    # pixel under test
-                right_of_center_pixel = img_padded[y + 2, x + 4]
+        max_filt = ndimage.maximum_filter(img_padded, footprint=fp)
+        min_filt = ndimage.minimum_filter(img_padded, footprint=fp)
 
-                bottom_right = img_padded[y + 4, x]
-                bottom_mid = img_padded[y + 4, x + 2]
-                bottom_left = img_padded[y + 4, x + 4]
+        possible_dead_pixels = np.logical_or(img_padded > max_filt, img_padded < min_filt)
 
-                neighbors = np.array([top_left, top_mid, top_right, left_of_center_pixel, right_of_center_pixel,
-                                      bottom_right, bottom_mid, bottom_left])
+        tmp_shape = (img_padded.shape[0], img_padded.shape[1], 1)
 
-                # center_pixel is good if pixel value is between min and max of a 3x3 neighborhhood.
-                if not(min(neighbors) < center_pixel < max(neighbors)):
+        cdif0 = ndimage.correlate(img_padded, np.array([[1, 0, 0, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, -1, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, 0, 0, 0]])).reshape(tmp_shape)
 
-                    # ""center_pixel is corrected only if the difference of center_pixel and every
-                    # neighboring pixel is greater than the speciified threshold.
-                    # The two if conditions are used in combination to reduce False positives.""
+        cdif1 = ndimage.correlate(img_padded, np.array([[0, 0, 1, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, -1, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, 0, 0, 0]])).reshape(tmp_shape)
 
-                    diff_with_center_pixel = abs(neighbors-center_pixel)
-                    thresh = np.full_like(
-                        diff_with_center_pixel, self.threshold)
+        cdif2 = ndimage.correlate(img_padded, np.array([[0, 0, 0, 0, 1],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, -1, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, 0, 0, 0]])).reshape(tmp_shape)
 
-                    # element-wise comparison of numpy arrays
-                    if np.all(diff_with_center_pixel > thresh):
-                        corrected_pv_count+=1 
+        cdif3 = ndimage.correlate(img_padded, np.array([[0, 0, 0, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [1, 0, -1, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, 0, 0, 0]])).reshape(tmp_shape)
 
-                        # Compute gradients
-                        vertical_grad = abs(
-                            2 * center_pixel - top_mid - bottom_mid)
-                        horizontal_grad = abs(
-                            2 * center_pixel - left_of_center_pixel - right_of_center_pixel)
-                        left_diagonal_grad = abs(
-                            2 * center_pixel - top_left - bottom_left)
-                        right_diagonal_grad = abs(
-                            2 * center_pixel - top_right - bottom_right)
+        cdif4 = ndimage.correlate(img_padded, np.array([[0, 0, 0, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, -1, 0, 1],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, 0, 0, 0]])).reshape(tmp_shape)
 
-                        min_grad = min(vertical_grad, horizontal_grad,
-                                       left_diagonal_grad, right_diagonal_grad)
+        cdif5 = ndimage.correlate(img_padded, np.array([[0, 0, 0, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, -1, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [1, 0, 0, 0, 0]])).reshape(tmp_shape)
 
-                        # Correct value is computed using neighbors in the direction of minimum gradient.
-                        if (min_grad == vertical_grad):
-                            center_pixel = (top_mid + bottom_mid) / 2
-                        elif (min_grad == horizontal_grad):
-                            center_pixel = (
-                                left_of_center_pixel + right_of_center_pixel) / 2
-                        elif (min_grad == left_diagonal_grad):
-                            center_pixel = (top_left + bottom_left) / 2
-                        else:
-                            center_pixel = (top_right + bottom_right) / 2
+        cdif6 = ndimage.correlate(img_padded, np.array([[0, 0, 0, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, -1, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, 1, 0, 0]])).reshape(tmp_shape)
+                                                
+        cdif7 = ndimage.correlate(img_padded, np.array([[0, 0, 0, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, -1, 0, 0],
+                                                        [0, 0, 0, 0, 0],
+                                                        [0, 0, 0, 0, 1]])).reshape(tmp_shape)
 
-                # Corrected pixels are placed in non-padded image.
-                dpc_img[y, x] = center_pixel
+        cdiff = np.abs(np.concatenate((cdif0, cdif1, cdif2, cdif3, cdif4, cdif5, cdif6, cdif7), axis=2))
+        del cdif0, cdif1, cdif2, cdif3, cdif4, cdif5, cdif6, cdif7
+
+        correct_at = np.logical_and(possible_dead_pixels, np.where(cdiff > self.threshold, True, False).any(axis=2))
+
+        gradH = np.abs(ndimage.correlate(img_padded, np.array([[-1, 0, 2, 0, -1]]))).reshape(tmp_shape)
+
+        gradV = np.abs(ndimage.correlate(img_padded, np.array([[-1, 0, 2, 0, -1]]).T)).reshape(tmp_shape)
+
+        grad45 = np.abs(ndimage.correlate(img_padded, np.array([[0, 0, 0, 0, -1],
+                                                                [0, 0, 0, 0, 0],
+                                                                [0, 0, 2, 0, 0],
+                                                                [0, 0, 0, 0, 0],
+                                                                [-1, 0, 0, 0, 0]]))).reshape(tmp_shape)
+
+        grad135 = np.abs(ndimage.correlate(img_padded, np.array([[-1, 0, 0, 0, 0],
+                                                                 [0, 0, 0, 0, 0],
+                                                                 [0, 0, 2, 0, 0],
+                                                                 [0, 0, 0, 0, 0],
+                                                                 [0, 0, 0, 0, -1]]))).reshape(tmp_shape)
+
+        min_grads = np.min(np.concatenate((gradH, gradV, grad45, grad135), axis=2), axis=2)
+
+        corrected = np.zeros(img_padded.shape)
+
+        meanH = ndimage.correlate(img_padded, np.array([[1, 0, 0, 0, 1]])) / 2
+
+        meanV = ndimage.correlate(img_padded, np.array([[1, 0, 0, 0, 1]]).T) / 2
+
+        mean45 = ndimage.correlate(img_padded, np.array([[0, 0, 0, 0, 1],
+                                                         [0, 0, 0, 0, 0],
+                                                         [0, 0, 0, 0, 0],
+                                                         [0, 0, 0, 0, 0],
+                                                         [1, 0, 0, 0, 0]])) / 2
+
+        mean135 = ndimage.correlate(img_padded, np.array([[1, 0, 0, 0, 0],
+                                                          [0, 0, 0, 0, 0],
+                                                          [0, 0, 0, 0, 0],
+                                                          [0, 0, 0, 0, 0],
+                                                          [0, 0, 0, 0, 1]])) / 2
+
+        corrected = np.where(min_grads == gradH, meanH, 
+                    np.where(min_grads == gradV, meanV, 
+                    np.where(min_grads == grad45, mean45, 
+                    np.where(min_grads == grad135, mean135, img_padded))))
+
+        del gradH, gradV, grad45, grad135
+        del meanH, meanV, mean45, mean135
+
+        corrected = np.where(correct_at, corrected, img_padded)
+
+        dpc_img = corrected[2:-2, 2:-2]
+        
         self.img = np.uint16(np.clip(dpc_img, 0, (2**self.bpp)-1))
         if self.is_debug:
+            corrected_pv_count = np.where(correct_at, 1, 0).sum()
             print('   - Number of corrected pixels = ', corrected_pv_count)
             print('   - Threshold = ', self.threshold)
         return self.img
