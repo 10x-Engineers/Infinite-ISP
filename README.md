@@ -421,3 +421,12 @@ This project is licensed under Apache 2.0 (see [LICENSE](LICENSE) file).
 - [Mushfiqulalam - isp](https://github.com/mushfiqulalam/isp)
 - [Karaimer - A Software Platform for Manipulating the Camera Imaging Pipeline](https://karaimer.github.io/camera-pipeline)
 - [rawpy](https://github.com/letmaik/rawpy.git)
+
+## Contact
+For any inquiries or feedback feel free to reach out.
+
+Email: isp@10xengineers.ai
+
+Website: http://www.10xEngineers.ai
+
+LinkedIn: https://www.linkedin.com/company/10x-engineers/
