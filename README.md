@@ -11,8 +11,8 @@ Infinite-ISP is a one stop solution for all your ISP development needs - from al
 | **[Infinite-ISP_TuningTool](https://github.com/10xEngineersTech/Infinite-ISP_TuningTool)**                              | Collection of calibration and analysis tools for the Infinite-ISP |
 
 
-# Infinite-ISP_AlgorithmDesign: A Python-based Model for ISP Algorithm Development
-Infinite-ISP is a collections of camera pipeline modules implemented at the application level for converting an input RAW image from a sensor to an output RGB image. Infinite-isp aims to contain simple to complex algorithms at each modular level.
+# Infinite-ISP Algorithm Design: A Python-based Model for ISP Algorithm Development
+Infinite-ISP Algorithm Design is a collections of camera pipeline modules implemented at the application level for converting an input RAW image from a sensor to an output RGB image. Infinite-isp aims to contain simple to complex algorithms at each modular level.
 
 
 ![](assets/infinite-isp-architecture-initial.png)
