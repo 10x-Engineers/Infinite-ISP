@@ -6,7 +6,7 @@ Infinite-ISP is a one stop solution for all your ISP development needs - from al
 | -------------  | ------------- |
 | **[Infinite-ISP_AlgorithmDesign](https://github.com/xx-isp/infinite-isp)** :anchor:                    | Python based model of the Infinite-ISP pipeline for algorithm development |
 | **[Infinite-ISP_ReferenceModel](https://github.com/10xEngineersTech/Infinite-ISP_ReferenceModel)**                      | Python based fixed-point model of the Infinite-ISP pipeline for hardware implementation |
-| **[Infinite-ISP_FPGABinaries](https://github.com/10xEngineersTech/Infinite-ISP_FPGABitstream)**                                      | FPGA bit-stream for the  Kria kV260’s Xilinx® ZU5EV Ultrascale FPGA|
+| **[Infinite-ISP_FPGABinaries](https://github.com/10xEngineersTech/Infinite-ISP_FPGABitstream)**                                      |FPGA binaries (bitstream + firmware executable) for the Xilinx® Kria KV260’s XCK26 Zynq UltraScale + MPSoC|
 | **[Infinite-ISP_Firmware](https://github.com/10xEngineersTech/Infinite-ISP_Firmware)**                                      | Firmware for the Kria kV260’s embedded Arm® Cortex®A53 processor|
 | **[Infinite-ISP_TuningTool](https://github.com/10xEngineersTech/Infinite-ISP_TuningTool)**                              | Collection of calibration and analysis tools for the Infinite-ISP |
 
