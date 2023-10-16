@@ -1,6 +1,6 @@
 
 # Infinite-ISP
-Infinite-ISP is a one stop solution for all your ISP development needs - from algorithms to an FPGA prototype and associated firmware, tools, etc. Its primary goal is to offer a unified platform that empowers ISP developers to accelerate ISP innovation. It includes a complete collection of camera pipeline modules written in Python, an FPGA bit-stream & the associated firmware for the implementation of the pipeline on the Kria KV260 development board and lastly a stand-alone Python based Tuning tool application for the pipeline.  The main components of the Infinite-ISP project are listed below:
+Infinite-ISP is a full-stack ISP development platform - from algorithm development to RTL design, FPGA/ASIC implementation, and associated firmware, tools, etc. It offers a unified platform that empowers ISP developers to accelerate ISP innovation. It includes a complete collection of camera pipeline modules written in Python, an FPGA bitstream & the associated Firmware for the implementation of the pipeline on the Kria KV260 development board, and lastly, a stand-alone Python-based Tuning Tool application for the pipeline. The main components of the Infinite-ISP project are listed below:
 
 | Repository name        | Description      | 
 | -------------  | ------------- |
@@ -423,10 +423,10 @@ This project is licensed under Apache 2.0 (see [LICENSE](LICENSE) file).
 - [rawpy](https://github.com/letmaik/rawpy.git)
 
 ## Contact
-For any inquiries or feedback feel free to reach out.
+For any inquiries or feedback, feel free to reach out.
 
 Email: isp@10xengineers.ai
 
-Website: http://www.10xEngineers.ai
+Website: http://www.10xengineers.ai
 
 LinkedIn: https://www.linkedin.com/company/10x-engineers/
