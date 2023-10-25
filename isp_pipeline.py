@@ -146,7 +146,7 @@ awb_img = awb.execute()
 ccm = CCM(awb_img, sensor_info, parm_ccm)
 ccm_img = ccm.execute()
 
-#  Gamma
+# Gamma
 gc = GC(ccm_img, sensor_info, parm_gmc)
 gamma_raw = gc.execute()
 
@@ -158,20 +158,20 @@ ae_img = ae.execute()
 csc = CSC(ae_img, sensor_info, parm_csc)
 csc_img = csc.execute()
 
+# 2d noise reduction
+nr2d = NR2D(csc_img, sensor_info, parm_2dn, platform)
+nr2d_img = nr2d.execute()
+
 # Local Dynamic Contrast Improvement
-ldci = LDCI(csc_img, sensor_info, parm_ldci)
+ldci = LDCI(nr2d_img, sensor_info, parm_ldci)
 ldci_img = ldci.execute()
 
-# 14 Sharpening
+# Sharpening
 sharp = SHARP(ldci_img, sensor_info, parm_sha)
 sharp_img = sharp.execute()
 
-# 15 2d noise reduction
-nr2d = NR2D(sharp_img, sensor_info, parm_2dn, platform)
-nr2d_img = nr2d.execute()
-
 # Scaling
-scale = Scale(nr2d_img, sensor_info, parm_sca)
+scale = Scale(sharp_img, sensor_info, parm_sca)
 scaled_img = scale.execute()
 
 # 16 YUV saving format 444, 422 etc
