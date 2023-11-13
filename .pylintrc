@@ -1,0 +1,7 @@
+[MESSAGES CONTROL]
+disable=unsubscriptable-object,E1136, E1137, R,E0401, C3001, E1121, W0201
+
+# E0401: Unable to import 'util.utils' (import-error)
+# C3001: Lambda expression assigned to a variable. 
+#        Define a function using the "def" keyword instead. (unnecessary-lambda-assignment)
+# E1121: Too many positional arguments for method call (too-many-function-args)

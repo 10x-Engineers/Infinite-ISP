@@ -1,0 +1,39 @@
+name: Linting on Pull Request
+
+on:
+  pull_request:
+    types: [opened,synchronize]
+
+jobs:
+  lintonPR: 
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: |
+        pip install pylint
+
+    - name: Fetch Main
+      run: |
+        git fetch origin main
+        git diff --name-only origin/main..HEAD 
+
+    - name: Run pylint on modified files
+      run: |
+        set -e
+        IFS=$'\n'
+        changed_files=$(git diff --name-only origin/main..HEAD | grep ".py$" || true)
+        if [ "$changed_files" ]; then
+          for file in $changed_files; do
+            if [ -e "$file" ]; then
+              echo "Linting $file"
+              pylint "$file"
+            else
+              echo "Skipping lint for deleted file: $file"
+            fi
+          done
+        else
+          echo "No Python files have been changed."
+        fi

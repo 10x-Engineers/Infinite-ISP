@@ -1,11 +1,13 @@
-# Script for generating requirements.txt for this project
-# Would'nt it be silly to run this file without python and pip
+"""
+Script for generating requirements.txt for this project
+Would'nt it be silly to run this file without python and pip
+"""
 
 import subprocess
 
-x = subprocess.check_output(["pip", "freeze"]).decode()
+X = subprocess.check_output(["pip", "freeze"]).decode()
 
-if ("pipreqs" not in x) :
-    subprocess.run( ["pip", "install", "pipreqs"]  )
+if "pipreqs" not in X:
+    subprocess.run(["pip", "install", "pipreqs"], check=True)
 
-subprocess.run( ["pipreqs", "--force"]  )
+subprocess.run(["pipreqs", "--force"], check=True)
