@@ -1,0 +1,25 @@
+name: Linting All on Pull Request
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  lintAllonPR: 
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: |
+        pip install pylint
+
+    - name: Fetch Main
+      run: |
+        git fetch origin main
+        git diff --name-only origin/main..HEAD 
+
+    - name: Run pylint on all files
+      run: |
+        find . -name "*.py" -exec pylint {} +
