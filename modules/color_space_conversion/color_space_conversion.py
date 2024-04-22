@@ -23,7 +23,7 @@ class ColorSpaceConversion:
     Color Space Conversion
     """
 
-    def __init__(self, img, platform, sensor_info, parm_csc):
+    def __init__(self, img, platform, sensor_info, parm_csc, parm_cse):
         self.img = img.copy()
         self.is_save = parm_csc["is_save"]
         self.platform = platform
@@ -33,6 +33,7 @@ class ColorSpaceConversion:
         self.conv_std = self.parm_csc["conv_standard"]
         self.rgb2yuv_mat = None
         self.yuv_img = None
+        self.parm_cse = parm_cse
 
     def rgb_to_yuv_8bit(self):
         """
@@ -64,6 +65,16 @@ class ColorSpaceConversion:
         # convert image with its provided bit_depth
         yuv_2d = np.float64(yuv_2d) / (2**8)
         yuv_2d = np.where(yuv_2d >= 0, np.floor(yuv_2d + 0.5), np.ceil(yuv_2d - 0.5))
+
+        # color saturation enhancment block:
+        if self.parm_cse['is_enable']:
+            gain = self.parm_cse['saturation_gain']
+
+            yuv_2d[1, :] = yuv_2d[1, :] * gain
+            yuv_2d[2, :] = yuv_2d[2, :] * gain
+
+
+
 
         # black-level/DC offset added to YUV values
         yuv_2d[0, :] = 2 ** (self.bit_depth / 2) + yuv_2d[0, :]

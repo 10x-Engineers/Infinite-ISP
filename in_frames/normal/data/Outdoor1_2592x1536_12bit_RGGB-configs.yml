@@ -42,7 +42,7 @@ black_level_correction:
   b_sat: 4095
   is_save: false
 
-OECF:
+oecf:
   is_enable: false
   # Make sure the LUT has the right bit range i.e. if image is of 10 bit LUT should be from [0 - (2^10)-1]
   # LUT here does nothing to the sensor response i.e. a value of 800 maps to 800 and 2000 maps to 2000  
@@ -127,6 +127,10 @@ color_space_conversion:
   # Bt.709 HD =   1
   # Bt.601/4407 = 2
   is_save: false
+
+color_saturation_enhancement:
+  is_enable: true
+  saturation_gain: 1.5
 
 
 ldci:
