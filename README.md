@@ -47,6 +47,7 @@ InfiniteISP also tries to simulate the **3A-Algorithms**.
 | Color Correction Matrix                       | Calibration / sensor dependent <br> - 3x3 CCM from config  | Yes <br> - 4x3 CCM  |
 | Gamma Tone Mapping                            | Gamma LUT in RGB from config file  | Yes <br> - YUV and RGB domain|
 | Color Space Conversion                        | YCbCr digital <br> - BT 601 <br> - Bt 709  <br>   | Yes <br> - YUV analogue |
+|Color Saturation Enhancement                   | Saturation gain applied on Chroma Channels on YUV/YCrCb Domain| Yes|
 | Contrast Enhancement                          | Modified [contrast limited adaptive histogram equalization](https://arxiv.org/ftp/arxiv/papers/2108/2108.12818.pdf#:~:text=The%20technique%20to%20equalize%20the,a%20linear%20trend%20(CDF))  | ---- |
 | Edge Enhancement / Sharpeining                | Simple unsharp masking with strength control | Yes | 
 | Noise Reduction                               | [Non-local means filter](https://www.ipol.im/pub/art/2011/bcm_nlm/article.pdf) | Yes <br> - NLM filter <br> - Bilateral noise filter|
@@ -305,6 +306,13 @@ To be implemented
 |------------------------|-------------------------------------------------------------------------------------|
 | is_enable               | This is a essential module and cannot be disabled                                   |   
 | conv_standard          | The standard to be used for conversion <br> - `1` : Bt.709 HD <br> - `2` : Bt.601/407 |   
+
+### Color Saturation Enhancement (CSE)
+
+| color_saturation_enhancement | Details                                                                             |  
+|------------------------|-------------------------------------------------------------------------------------|
+| is_enable               | When enabled color saturation enhancement is applied to the chroma channels|                                  |   
+| saturation_gain         | Positive float gain applied on both chroma channels that controls how much color saturation should be increase. |   
 
 ### Contrast Enchancement 
 
