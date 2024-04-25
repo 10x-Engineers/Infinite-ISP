@@ -125,6 +125,10 @@ color_space_conversion:
   # Bt.601/4407 = 2
   is_save: false
 
+color_saturation_enhancement:
+  is_enable: true
+  saturation_gain: 1.5
+
 
 ldci:
   is_enable: false
@@ -139,10 +143,10 @@ sharpen:
   is_save: false
 
 2d_noise_reduction:
-  is_enable: false
+  is_enable: true
   # nlm
-  window_size: 21
-  patch_size: 9
+  window_size: 9
+  patch_size: 5
   wts: 10
   is_save: false
   
