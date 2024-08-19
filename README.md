@@ -9,8 +9,8 @@ Infinite-ISP is a full-stack ISP development platform - from algorithm developme
 | 1  | **[Infinite-ISP_AlgorithmDesign](https://github.com/10x-Engineers/Infinite-ISP)**   :anchor:                  | Python based model of the Infinite-ISP pipeline for algorithm development |
 | 2  | **[Infinite-ISP_ReferenceModel](https://github.com/10x-Engineers/Infinite-ISP_ReferenceModel)**                      | Python based fixed-point model of the Infinite-ISP pipeline for hardware implementation |
 | 3  | **[Infinite-ISP_RTL](https://github.com/10x-Engineers/Infinite-ISP_RTL)**  | RTL development of the Infinite-ISP pipeline **[(Request Access)](https://docs.google.com/forms/d/e/1FAIpQLSfOIldU_Gx5h1yQEHjGbazcUu0tUbZBe0h9IrGcGljC5b4I-g/viewform?usp=sharing)** |
-| 4  | **[InfiniteISP_Automated_Testing](Repo_link)** | Streamline the testing and debugging process of RTL developement using [Infinite-ISP_ReferenceModel](https://github.com/10x-Engineers/Infinite-ISP_ReferenceModel) |
-| 5  | **[InfiniteISP_FPGA_XCK26](Repo_link)** | FPGA integration for the Xilinx® Kria KV260’s XCK26 Zynq UltraScale + MPSoC |
+| 4  | **[InfiniteISP_Automated_Testing](https://github.com/10x-Engineers/InfiniteISP_Automated_Testing)** | Streamline the testing and debugging process of RTL developement using [Infinite-ISP_ReferenceModel](https://github.com/10x-Engineers/Infinite-ISP_ReferenceModel) |
+| 5  | **FPGA Implementation** | FPGA integration of Infinite-ISP on different FPGAs <br>  <ul><li>Xilinx® Kria KV260’s XCK26 Zynq UltraScale + MPSoC **[InfiniteISP_FPGA_XCK26](https://github.com/10x-Engineers/InfiniteISP_FPGA_XCK26)**</li></ul>   |
 | 6  | **[Infinite-ISP_FPGABinaries](https://github.com/10x-Engineers/Infinite-ISP_FPGABinaries)**         | FPGA binaries (bitstream + firmware executable) for the Xilinx® Kria KV260’s XCK26 Zynq UltraScale + MPSoC|
 | 7  | **[Infinite-ISP_TuningTool](https://github.com/10x-Engineers/Infinite-ISP_TuningTool)**                              | Collection of calibration and analysis tools for the Infinite-ISP |
 
