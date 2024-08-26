@@ -14,7 +14,7 @@ Infinite-ISP is a full-stack ISP development platform designed for all aspects o
 | 6  | **[Infinite-ISP_FPGABinaries](https://github.com/10x-Engineers/Infinite-ISP_FPGABinaries)**         | FPGA binaries (bitstream + firmware executable) for the Xilinx® Kria KV260’s XCK26 Zynq UltraScale + MPSoC|
 | 7  | **[Infinite-ISP_TuningTool](https://github.com/10x-Engineers/Infinite-ISP_TuningTool)**                              | Collection of calibration and analysis tools for the Infinite-ISP |
 
-* **[Request Access](https://docs.google.com/forms/d/e/1FAIpQLSfOIldU_Gx5h1yQEHjGbazcUu0tUbZBe0h9IrGcGljC5b4I-g/viewform?usp=sharing) to Infinite_ISP-RTL, Infinite-ISP_AutomatedTesting and Infinite-ISP_FPGA_XCK26 repositories**
+**[Request Access](https://docs.google.com/forms/d/e/1FAIpQLSfOIldU_Gx5h1yQEHjGbazcUu0tUbZBe0h9IrGcGljC5b4I-g/viewform?usp=sharing)** to **Infinite_ISP-RTL, Infinite-ISP_AutomatedTesting** and **Infinite-ISP_FPGA_XCK26** repositories
 
 # Infinite-ISP Algorithm Design: A Python-based Model for ISP Algorithm Development
 Infinite-ISP Algorithm Design is a collections of camera pipeline modules implemented at the application level for converting an input RAW image from a sensor to an output RGB image. Infinite-isp aims to contain simple to complex algorithms at each modular level.
