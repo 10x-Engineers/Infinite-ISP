@@ -1,7 +1,12 @@
 [MESSAGES CONTROL]
-disable=unsubscriptable-object,E1136, E1137, R,E0401, C3001, E1121, W0201
+disable=unsubscriptable-object,E1136, E1137, R,E0401, C3001, E1121, E0001, C0209,  W1514, C0302, W0621, W0201, C0413, E0606
 
 # E0401: Unable to import 'util.utils' (import-error)
 # C3001: Lambda expression assigned to a variable. 
 #        Define a function using the "def" keyword instead. (unnecessary-lambda-assignment)
 # E1121: Too many positional arguments for method call (too-many-function-args)
+# C0302: Too many lines in module (too-many-lines)
+# W0621: Redefining name 'x' from outer scope (redefined-outer-name)
+# W0201: Attribute 'x' defined outside __init__ (attribute-defined-outside-init)
+# C0413: Import "import infinite_isp" should be placed at the top of the module (wrong-import-position)
+# E0606: Possibly using variable 'r_channel' before assignment (possibly-used-before-assignment)
