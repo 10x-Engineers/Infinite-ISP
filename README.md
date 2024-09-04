@@ -23,7 +23,7 @@ Infinite-ISP is a full-stack ISP development platform designed for all aspects o
     <img src="https://img.shields.io/badge/Request%20Access-ff0000?style=for-the-badge&logo=openaccess&logoColor=white" alt="Button" style="border-radius: 12px;">
 </a> 
 
-Click the above to requess access to <b>Infinite_ISP-RTL</b>, <b>Infinite-ISP_AutomatedTesting</b>, and <b>Infinite-ISP_FPGA_XCK26</b> repositories
+Click the above to request access to <b>Infinite_ISP-RTL</b>, <b>Infinite-ISP_AutomatedTesting</b>, and <b>Infinite-ISP_FPGA_XCK26</b> repositories
 
 <!-- **[Request Access](https://docs.google.com/forms/d/e/1FAIpQLSfOIldU_Gx5h1yQEHjGbazcUu0tUbZBe0h9IrGcGljC5b4I-g/viewform?usp=sharing)** to **Infinite_ISP-RTL, Infinite-ISP_AutomatedTesting** and **Infinite-ISP_FPGA_XCK26** repositories  -->
 
