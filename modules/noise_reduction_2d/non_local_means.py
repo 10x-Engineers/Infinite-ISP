@@ -39,7 +39,7 @@ class NLM:
 
         # The similarity between pixels is compared on the bases of the
         # Euclidean distance between them
-        distance = np.arange(255**2)
+        distance = np.arange(256**2)
         lut = np.exp(-distance / wts**2) * 1024
 
         return lut.astype(np.int32)
