@@ -50,7 +50,7 @@ class ColorSpaceConversion:
             # for BT.601/407
             # conversion metrix with 8bit integer co-efficients - m=8
             self.rgb2yuv_mat = np.array(
-                [[77, 150, 29], [131, -110, -21], [-44, -87, 138]]
+                [[77, 150, 29], [-44, -87, 138], [131, -110, -21]]
             )
 
         # make nx3 2d matrix of image
