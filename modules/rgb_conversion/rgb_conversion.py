@@ -56,7 +56,7 @@ class RGBConversion:
         else:
             # for BT.601/407
             # conversion metrix with 8bit integer co-efficients - m=8
-            self.yuv2rgb_mat = np.array([[64, 87, 0], [64, -44, -20], [61, 0, 105]])
+            self.yuv2rgb_mat = np.array([[64, 0, 87], [64, -20, -44], [61, 105, 0]])
 
         # convert to RGB
         rgb_2d = np.matmul(self.yuv2rgb_mat, mat2d_t)
