@@ -50,13 +50,13 @@ class RGBConversion:
         # subract the offsets
         mat2d_t = mat2d_t - np.array([[16, 128, 128]]).transpose()
 
-        if self.conv_std == 1:
+       if self.conv_std == 1:
             # for BT. 709
-            self.yuv2rgb_mat = np.array([[74, 0, 114], [74, -13, -34], [74, 135, 0]])
+            self.yuv2rgb_mat = np.array([[69, 0, 109], [69, -13, -32], [69, 128, 0]])
         else:
             # for BT.601/407
             # conversion metrix with 8bit integer co-efficients - m=8
-            self.yuv2rgb_mat = np.array([[64, 0, 87], [64, -20, -44], [61, 105, 0]])
+            self.yuv2rgb_mat = np.array([[72, 0, 101], [72, -25, -52], [72, 128, 0]])
 
         # convert to RGB
         rgb_2d = np.matmul(self.yuv2rgb_mat, mat2d_t)
