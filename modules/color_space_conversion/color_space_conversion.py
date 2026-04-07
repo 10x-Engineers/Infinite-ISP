@@ -43,14 +43,14 @@ class ColorSpaceConversion:
         if self.conv_std == 1:
             # for BT. 709
             self.rgb2yuv_mat = np.array(
-                [[47, 157, 16], [-26, -86, 112], [112, -102, -10]]
+                [[54, 182, 18], [-29, -98, 128], [128, -116, -12]]
             )
         else:
 
             # for BT.601/407
             # conversion metrix with 8bit integer co-efficients - m=8
             self.rgb2yuv_mat = np.array(
-                [[77, 150, 29], [-44, -87, 138], [131, -110, -21]]
+                [[77, 150, 29], [-43, -84, 128], [128, -107, -21]]
             )
 
         # make nx3 2d matrix of image
