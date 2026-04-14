@@ -43,14 +43,14 @@ class ColorSpaceConversion:
         if self.conv_std == 1:
             # for BT. 709
             self.rgb2yuv_mat = np.array(
-                [[54, 182, 18], [-29, -98, 128], [128, -116, -12]]
+                [[47, 157, 16], [-26, -86, 112], [112, -102, -10]]
             )
         else:
 
             # for BT.601/407
             # conversion metrix with 8bit integer co-efficients - m=8
             self.rgb2yuv_mat = np.array(
-                [[77, 150, 29], [-43, -84, 128], [128, -107, -21]]
+                [[77, 150, 29], [-43, -85, 128], [128, -107, -21]]
             )
 
         # make nx3 2d matrix of image
@@ -77,7 +77,8 @@ class ColorSpaceConversion:
 
 
         # black-level/DC offset added to YUV values
-        yuv_2d[0, :] = 2 ** (self.bit_depth / 2) + yuv_2d[0, :]
+        if self.conv_std == 1:
+            yuv_2d[0, :] = 2 ** (self.bit_depth / 2) + yuv_2d[0, :]
         yuv_2d[1, :] = 2 ** (self.bit_depth - 1) + yuv_2d[1, :]
         yuv_2d[2, :] = 2 ** (self.bit_depth - 1) + yuv_2d[2, :]
 
