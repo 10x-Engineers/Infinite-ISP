@@ -47,16 +47,17 @@ class RGBConversion:
         # convert to 3xn for matrix multiplication
         mat2d_t = mat_2d.transpose()
 
-        # subract the offsets
-        mat2d_t = mat2d_t - np.array([[16, 128, 128]]).transpose()
-
         if self.conv_std == 1:
             # for BT. 709
+            # subract the offsets
+            mat2d_t = mat2d_t - np.array([[16, 128, 128]]).transpose()
             self.yuv2rgb_mat = np.array([[74, 0, 114], [74, -13, -34], [74, 135, 0]])
         else:
             # for BT.601/407
             # conversion metrix with 8bit integer co-efficients - m=8
-            self.yuv2rgb_mat = np.array([[64, 0, 87], [64, -20, -44], [61, 105, 0]])
+            # subract the offsets
+            mat2d_t = mat2d_t - np.array([[0, 128, 128]]).transpose()
+            self.yuv2rgb_mat = np.array([[64, 0, 90], [64, -22, -46], [64, 113, 0]])
 
         # convert to RGB
         rgb_2d = np.matmul(self.yuv2rgb_mat, mat2d_t)
