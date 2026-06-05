@@ -23,8 +23,8 @@ Feedback / issues: please open a GitHub Issue (label: `demo`).
 | 6  | **[Infinite-ISP_FPGABinaries](https://github.com/10x-Engineers/Infinite-ISP_FPGABinaries)**         | FPGA binaries (bitstream + firmware executable) for the Xilinx® Kria KV260’s XCK26 Zynq UltraScale + MPSoC|
 | 7  | **[Infinite-ISP_TuningTool](https://github.com/10x-Engineers/Infinite-ISP_TuningTool)**                              | Collection of calibration and analysis tools for the Infinite-ISP |
 | 8  | **[Infinite-ISP_LinuxCameraStack](https://github.com/10x-Engineers/Infinite-ISP_LinuxCameraStack.git)** | Extending Linux support to Infinite-ISP and the developement of Linux-based camera application stack |
-| 9  | **[Infinite-ISP_GPU](https://10xengineers.ai/cuda-isp/)** | Cuda based model of Infinite ISP to run ISP on NVIDIA Jetson & x86 platforms |
-| 10  | **[Infinite-ISP_LumaIQ](https://10xengineers.ai/lumaiq/)** | Integrated IQ analysis workbench for ISP tuning, YAML-native pipeline editing, and automated image quality evaluation |
+| 9  | **[Infinite-ISP_GPU](https://10xengineers.ai/cuda-isp/)** 💥 | Proprietary CUDA-accelerated ISP purpose-built for NVIDIA® Jetson™ edge devices and discrete GPU platforms. |
+| 10  | **[Infinite-ISP_LumaIQ](https://10xengineers.ai/lumaiq/)** 💥 | Proprietary integrated IQ analysis workbench for ISP tuning, YAML-native pipeline editing, and automated image quality evaluation |
 
 
 <a href="https://docs.google.com/forms/d/e/1FAIpQLSfOIldU_Gx5h1yQEHjGbazcUu0tUbZBe0h9IrGcGljC5b4I-g/viewform?usp=sharing" target="_blank">
