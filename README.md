@@ -1,6 +1,7 @@
 # Infinite-ISP
 Infinite-ISP is a full-stack ISP development platform designed for all aspects of a hardware ISP. It includes a collection of camera pipeline modules written in Python, a fixed-point reference model, an optimized RTL design, an FPGA integration framework and its associated firmware ready for Xilinx® Kria KV260 development board. The platform features a stand-alone Python-based Tuning Tool that allows tuning of ISP parameters for different sensors and applications. Finally, it also offers a software solution for Linux by providing required drivers and a custom application development stack to bring Infinite-ISP to the Linux platforms.
 
+
 ## 🔗 Web Demo
 Try Infinite-ISP in your browser: 
 [![Web Demo](https://img.shields.io/badge/Try%20Now-red?style=for-the-badge)](https://infinite-isp.10xengineers.ai/)
@@ -11,6 +12,10 @@ Feedback / issues: please open a GitHub Issue (label: `demo`).
 ![](assets/Infinite-ISP_Repo_Flow.png)
 
 
+| Sr.     | Module Name        | Description      | 
+|---------| -------------  | ------------- |
+| 1  | **[Infinite-ISP_GPU](https://10xengineers.ai/cuda-isp/)** 💥 | Proprietary commercial-grade CUDA-accelerated ISP purpose-built for NVIDIA® Jetson™ edge devices and discrete GPU platforms. |
+| 2  | **[Infinite-ISP_LumaIQ](https://10xengineers.ai/lumaiq/)** 💥 | Premium integrated IQ analysis workbench for ISP tuning, YAML-native pipeline editing, and automated image quality evaluation |
 
 
 | Sr.     | Repository name        | Description      | 
@@ -23,8 +28,9 @@ Feedback / issues: please open a GitHub Issue (label: `demo`).
 | 6  | **[Infinite-ISP_FPGABinaries](https://github.com/10x-Engineers/Infinite-ISP_FPGABinaries)**         | FPGA binaries (bitstream + firmware executable) for the Xilinx® Kria KV260’s XCK26 Zynq UltraScale + MPSoC|
 | 7  | **[Infinite-ISP_TuningTool](https://github.com/10x-Engineers/Infinite-ISP_TuningTool)**                              | Collection of calibration and analysis tools for the Infinite-ISP |
 | 8  | **[Infinite-ISP_LinuxCameraStack](https://github.com/10x-Engineers/Infinite-ISP_LinuxCameraStack.git)** | Extending Linux support to Infinite-ISP and the developement of Linux-based camera application stack |
-| 9  | **[Infinite-ISP_GPU](https://10xengineers.ai/cuda-isp/)** 💥 | Proprietary CUDA-accelerated ISP purpose-built for NVIDIA® Jetson™ edge devices and discrete GPU platforms. |
-| 10  | **[Infinite-ISP_LumaIQ](https://10xengineers.ai/lumaiq/)** 💥 | Proprietary integrated IQ analysis workbench for ISP tuning, YAML-native pipeline editing, and automated image quality evaluation |
+
+
+
 
 
 <a href="https://docs.google.com/forms/d/e/1FAIpQLSfOIldU_Gx5h1yQEHjGbazcUu0tUbZBe0h9IrGcGljC5b4I-g/viewform?usp=sharing" target="_blank">
