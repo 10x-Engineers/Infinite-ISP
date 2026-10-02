@@ -24,6 +24,21 @@ OUTPUT_DIR = "out_frames/"
 OUTPUT_ARRAY_DIR = "./module_output/"
 
 
+def pad_cfa(img):
+    """
+    Pad each CFA channel separately by one pixel (two pixels on the raw image).
+
+    Same-color neighbours are two pixels apart on a Bayer grid, so a plain
+    mirror/reflect padding of the raw image maps the neighbour of a pixel at
+    index 1 (or N-2) back onto the pixel itself. Reflecting every same-color
+    sub-image on its own gives the nearest real same-color pixel instead.
+    """
+    padded = np.empty((img.shape[0] + 4, img.shape[1] + 4), dtype=img.dtype)
+    for row in (0, 1):
+        for col in (0, 1):
+            padded[row::2, col::2] = np.pad(img[row::2, col::2], 1, mode="reflect")
+    return padded
+
 def introduce_defect(img, total_defective_pixels, padding):
 
     """
@@ -261,7 +276,7 @@ class CustomDumper(yaml.Dumper):
     of the increase_indent and write_line_break methods. It ensures that indentations
     and line breaks are inserted correctly in the output YAML file."""
 
-    def increase_indent(self, flow=False, indentless=False):
+    def increase_indent(self, flow=False, indentless=False):  # pylint: disable=unused-argument
         """For indentation"""
         return super(CustomDumper, self).increase_indent(flow, False)
 
