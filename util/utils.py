@@ -170,9 +170,9 @@ def stride_convolve2d(matrix, kernel):
     ]
 
 
-def display_ae_statistics(ae_feedback, awb_gains):
+def display_ae_statistics(ae_result, awb_gains):
     """
-    Print AE Stats for current frame
+    Print 3A Stats for current frame (ae_result: the auto_exposure decision)
     """
     # Logs for AWB
     if awb_gains is None:
@@ -182,15 +182,37 @@ def display_ae_statistics(ae_feedback, awb_gains):
         print("   - 3A Stats    - AWB Bgain = ", awb_gains[1])
 
     # Logs for AE
-    if ae_feedback is None:
+    if ae_result is None:
         print("   - 3A Stats    - AE is Disable")
+        return
+    ev_err = ae_result["ev_err"] / 256.0
+    if ae_result["converged"]:
+        verdict = "Correct Exposure"
+    elif ev_err > 0:
+        verdict = "Underexposed"
     else:
-        if ae_feedback < 0:
-            print("   - 3A Stats    - AE Feedback = Underexposed")
-        elif ae_feedback > 0:
-            print("   - 3A Stats    - AE Feedback = Overexposed")
-        else:
-            print("   - 3A Stats    - AE Feedback = Correct Exposure")
+        verdict = "Overexposed"
+    print(f"   - 3A Stats    - AE Metered Mean = {ae_result['vm']} "
+          f"(target {ae_result['target_mean']})")
+    print(f"   - 3A Stats    - AE Exposure Error = {ev_err:+.2f} EV -> {verdict}")
+    if not ae_result["converged"] and not ae_result["moved"]:
+        print("   - 3A Stats    - AE Digital gain cannot get closer to the target "
+              "(end of gain_array or step too coarse)")
+    print(f"   - 3A Stats    - AE Digital Gain (next frame) = {ae_result['gain']}")
+
+
+def save_ae_statistics(img_name, stats, module_name):
+    """
+    Saves the per-grid AE statistics as CSV (one row per grid cell)
+    """
+    if not os.path.exists(OUTPUT_ARRAY_DIR):
+        Path(OUTPUT_ARRAY_DIR).mkdir(parents=True, exist_ok=False)
+    filename = OUTPUT_ARRAY_DIR + module_name + img_name.split(".")[0] + ".csv"
+    keys = list(stats)
+    with open(filename, "w", encoding="utf-8", newline="\n") as file:
+        file.write("cell," + ",".join(keys) + "\n")
+        for cell in range(len(stats[keys[0]])):
+            file.write(f"{cell}," + ",".join(str(stats[k][cell]) for k in keys) + "\n")
 
 
 def reconstruct_yuv_from_422_custom(yuv_422_custom, width, height):

@@ -73,11 +73,11 @@ InfiniteISP also tries to simulate the **3A-Algorithms**.
 | CFA Interpolation                             | [Malwar He Cutler’s](https://www.ipol.im/pub/art/2011/g_mhcd/article.pdf ) demosaicing algo  | Yes <br> - Malvar He Cutler|
 | **3A - Algorithms**                           | **AE & AWB** | ---- |
 | Auto White Balance                            | - [Grey World](https://www.sciencedirect.com/science/article/abs/pii/0016003280900587) <br> - [Norm 2](https://library.imaging.org/admin/apis/public/api/ist/website/downloadArticle/cic/12/1/art00008) <br> - [PCA algorithm](https://opg.optica.org/josaa/viewmedia.cfm?uri=josaa-31-5-1049&seq=0) | ---- |
-| Auto Exposure                                 | - [Auto Exposure](https://www.atlantis-press.com/article/25875811.pdf) based on skewness | ---- |
+| Auto Exposure                                 | HDR-ISP AE: <br> - per-grid statistics on the linear raw (green-only luma, clip counts) <br> - firmware EV-law control choosing the digital gain | ---- |
 | Color Correction Matrix                       | Calibration / sensor dependent <br> - 3x3 CCM from config  | Yes <br> - 4x3 CCM  |
 | Gamma Tone Mapping                            | Gamma LUT in RGB from config file  | Yes <br> - YUV and RGB domain|
 | Color Space Conversion                        | YCbCr digital <br> - BT 601 <br> - Bt 709  <br>   | Yes <br> - YUV analogue |
-|Color Saturation Enhancement                   | Saturation gain applied on Chroma Channels on YUV/YCrCb Domain| Yes|
+| Saturation Enhancement                        | HDR-ISP saturation enhancement on YUV after 2D noise reduction <br> - `global` Q4.8 chroma gain (the RTL register) <br> - `hue_rolloff` hue-selective gain with luminance roll-off | Yes|
 | Contrast Enhancement                          | Modified [contrast limited adaptive histogram equalization](https://arxiv.org/ftp/arxiv/papers/2108/2108.12818.pdf#:~:text=The%20technique%20to%20equalize%20the,a%20linear%20trend%20(CDF))  | ---- |
 | Edge Enhancement / Sharpeining                | Simple unsharp masking with strength control | Yes | 
 | Noise Reduction                               | [Non-local means filter](https://www.ipol.im/pub/art/2011/bcm_nlm/article.pdf) | Yes <br> - NLM filter <br> - Bilateral noise filter|
@@ -259,8 +259,45 @@ To be implemented
 | -----------     |   ---   |
 | is_enable        | This is a essential module and cannot be disabled 
 | is_debug         | Flag to output module debug logs
-| gain_array      | Gains array. User can select any one of the gain listed here. This module works together with AE module  |
+| is_auto          | When true the 3A - Auto Exposure control chooses `current_gain` (digital gain stands in for the sensor exposure) |
+| gain_array      | Gains array. User can select any one of the gain listed here. The AE control moves along this array  |
 | current_gain    | Index for the current gain starting from zero |
+
+### Auto Exposure Statistics
+
+HDR-ISP's AE statistics block. It runs on the linear raw after digital gain, before lens shading correction and noise reduction, on a 3x3 grid. Per cell: green pixels below / above the two thresholds, the sum of green values, and pixels (any channel) at 0 / full scale.
+
+| auto_exposure_stats | Details |
+| -----------         |   ---   |
+| is_enable           | Enables or disables this module (required by the 3A - Auto Exposure control) |
+| is_debug            | Flag to output module debug logs |
+| col_starts          | 4 column boundaries of the 3x3 grid in pixels, the last being the frame width |
+| row_starts          | 4 row boundaries of the 3x3 grid in pixels, the last being the frame height |
+| shadow_threshold    | Green values below it count as shadow, in DN at the sensor bit depth |
+| highlight_threshold | Green values above it count as highlight, in DN at the sensor bit depth |
+| is_save             | Saves the per-cell statistics as CSV |
+
+### 3A - Auto Exposure
+
+HDR-ISP's firmware AE control law (EV law). It meters a clip-corrected, centre-weighted green mean from the statistics and moves the exposure by `log2(target_mean / mean)` EV, capped when highlights or clipping exceed their budgets and never darker when most of the frame is dark. The move is applied as the nearest gain in `digital_gain.gain_array`; a target that falls between two gains is settled on one of them (the smaller error, never a brighter gain that breaks the highlight or clip budget) instead of alternating. With `render_3a` the pipeline repeats until the gain holds. EV values are in Q8 (256 = 1 EV).
+
+| auto_exposure      | Details |
+|--------------------|---------|
+| is_enable          | When enabled the AE control chooses the digital gain |
+| is_debug           | Flag to output module debug logs |
+| target_mean        | Target of the metered green mean, in DN at the sensor bit depth |
+| valid_min_pct      | A grid cell is metered only if at least this % of its greens are unclipped |
+| grid_weights       | 9 metering weights, row by row (centre-weighted) |
+| ev_deadband        | No move while the error is within this (Q8 EV) |
+| ev_hyst            | Extra deadband once converged (Q8 EV) |
+| ev_damp / ev_damp_fast | % of the error moved per frame (fast: after a scene change) |
+| ev_slew_max / ev_slew_fast | Largest move per frame (Q8 EV) |
+| scene_change_ev    | Errors above this (Q8 EV) use the fast damping and slew |
+| vm_iir_a           | % IIR on the metered mean between frames (bypassed in `render_3a`, which re-processes one frame) |
+| hi_frac_pm / hi_k  | Highlight budget (greens above `highlight_threshold`, per mille) and the strength of its cap (%) |
+| clip_frac_pm / clip_k | Clip budget (pixels at full scale, per mille) and the strength of its cap (%) |
+| dark_frac_pm       | Above this shadow fraction (per mille) the exposure is never reduced |
+| ev_max_pull        | The highlight / clip caps may pull at most this far below the mean's request (Q8 EV) |
 
 ### Lens Shading Calibration 
 
@@ -322,27 +359,12 @@ To be implemented
 | gamma_lut_12               | The look up table for 12-bit gamma curve |
 | gamma_lut_14              | The look up table for 14-bit gamma curve |
 
-### 3A - Auto Exposure
-| auto_exposure      | Details                                                                                      
-|--------------------|----------------------------------------------------------------------------------------------|
-| is_enable           | When enabled applies the 3A- Auto Exposure algorithm                                         |
-| is_debug            | Flag to output module debug logs                                                             |  
-| center_illuminance | The value of center illuminance for skewness calculation ranges from 0 to 255. Default is 90 |   
-| histogram_skewness | The range of histogram skewness should be between 0 and 1 for correct exposure calculation   |  
-
 ### Color Space Conversion (CSC)
 
 | color_space_conversion | Details                                                                             |  
 |------------------------|-------------------------------------------------------------------------------------|
 | is_enable               | This is a essential module and cannot be disabled                                   |   
 | conv_standard          | The standard to be used for conversion <br> - `1` : Bt.709 HD <br> - `2` : Bt.601/407 |   
-
-### Color Saturation Enhancement (CSE)
-
-| color_saturation_enhancement | Details                                                                             |  
-|------------------------|-------------------------------------------------------------------------------------|
-| is_enable               | When enabled color saturation enhancement is applied to the chroma channels|                                  |   
-| saturation_gain         | Positive float gain applied on both chroma channels that controls how much color saturation should be increase. |   
 
 ### Contrast Enchancement 
 
@@ -372,6 +394,21 @@ To be implemented
 | wts                | Smoothening strength parameter                    | 
 | wind               | Window size for applying entropy based bilateral filter           |  
 | sigma              | Range and spatial kernel parameter for entropy based bilateral filter                            |
+
+### Saturation Enhancement
+
+HDR-ISP's saturation enhancement, on the YUV image after 2D noise reduction. Y is never changed.
+
+| saturation_enhancement | Details |
+|------------------------|---------|
+| is_enable              | When enabled the chroma channels are scaled |
+| algorithm              | `global`: one gain on Cb and Cr, quantised to the RTL's 12-bit Q4.8 SAT_GAIN register (truncated) <br> `hue_rolloff`: the gain is shaped per pixel by hue (sky up, greens and yellows down, skin unchanged), faded out in deep shadows and near white, and kept off near-neutral pixels |
+| saturation_gain        | Saturation gain (1.0 = unchanged) |
+| highlight_rolloff      | `hue_rolloff`: luma (0 to 1) above which the boost fades out toward white |
+| shadow_fade            | `hue_rolloff`: luma (0 to 1) below which the boost fades out toward black |
+| mag_fade               | `hue_rolloff`: chroma magnitude below which the hue shaping fades to neutral |
+| hue_sat_lut            | `hue_rolloff`, optional: per-hue gain multipliers (any number of bins); a built-in camera-like table is used when absent |
+| is_save                | Saves the module output |
 
 ### Scaling 
 
