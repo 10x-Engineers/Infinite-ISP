@@ -367,8 +367,9 @@ class InfiniteISP:
         Execute Infinite-ISP with AWB gains and correct exposure
         """
 
-        # Maximum Iterations depend on total permissible gains
-        max_dg = len(self.parm_dga["gain_array"])
+        # Maximum Iterations depend on total permissible gains.
+        # Use the last valid gain index, as Digital Gain clamps to it
+        max_dg = len(self.parm_dga["gain_array"]) - 1
 
         # Run ISP-Pipeline
         self.run_pipeline(visualize_output=False)
