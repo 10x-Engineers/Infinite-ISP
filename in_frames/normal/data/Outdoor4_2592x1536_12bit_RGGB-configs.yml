@@ -155,9 +155,11 @@ color_space_conversion:
   # Bt.601/4407 = 2
   is_save: false
 
-color_saturation_enhancement:
+saturation_enhancement:
+  # runs after 2D noise reduction, before RGB conversion
   is_enable: true
   saturation_gain: 1.5
+  is_save: false
 
 
 ldci:

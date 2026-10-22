@@ -43,6 +43,9 @@ from modules.color_space_conversion.color_space_conversion import (
 from modules.ldci.ldci import LDCI
 from modules.sharpen.sharpen import Sharpening as SHARP
 from modules.noise_reduction_2d.noise_reduction_2d import NoiseReduction2d as NR2D
+from modules.saturation_enhancement.saturation_enhancement import (
+    SaturationEnhancement as SE,
+)
 from modules.rgb_conversion.rgb_conversion import RGBConversion as RGBC
 from modules.scale.scale import Scale
 from modules.yuv_conv_format.yuv_conv_format import YUVConvFormat as YUV_C
@@ -92,7 +95,7 @@ class InfiniteISP:
             self.parm_ccm = c_yaml["color_correction_matrix"]
             self.parm_gmc = c_yaml["gamma_correction"]
             self.parm_csc = c_yaml["color_space_conversion"]
-            self.parm_cse = c_yaml["color_saturation_enhancement"]
+            self.parm_se = c_yaml["saturation_enhancement"]
             self.parm_ldci = c_yaml["ldci"]
             self.parm_sha = c_yaml["sharpen"]
             self.parm_2dn = c_yaml["2d_noise_reduction"]
@@ -224,7 +227,7 @@ class InfiniteISP:
 
         # =====================================================================
         # Color space conversion
-        csc = CSC(gamma_raw, self.platform, self.sensor_info, self.parm_csc, self.parm_cse )
+        csc = CSC(gamma_raw, self.platform, self.sensor_info, self.parm_csc)
         csc_img = csc.execute()
 
         # =====================================================================
@@ -261,9 +264,20 @@ class InfiniteISP:
         nr2d_img = nr2d.execute()
 
         # =====================================================================
+        # Saturation enhancement
+        sat = SE(
+            nr2d_img,
+            self.platform,
+            self.sensor_info,
+            self.parm_se,
+            self.parm_csc["conv_standard"],
+        )
+        se_img = sat.execute()
+
+        # =====================================================================
         # RGB conversion
         rgbc = RGBC(
-            nr2d_img, self.platform, self.sensor_info, self.parm_rgb, self.parm_csc
+            se_img, self.platform, self.sensor_info, self.parm_rgb, self.parm_csc
         )
         rgbc_img = rgbc.execute()
 
