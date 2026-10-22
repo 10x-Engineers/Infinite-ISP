@@ -170,9 +170,9 @@ def stride_convolve2d(matrix, kernel):
     ]
 
 
-def display_ae_statistics(ae_feedback, awb_gains):
+def display_ae_statistics(ae_result, awb_gains):
     """
-    Print AE Stats for current frame
+    Print 3A Stats for current frame (ae_result: the auto_exposure decision)
     """
     # Logs for AWB
     if awb_gains is None:
@@ -182,15 +182,21 @@ def display_ae_statistics(ae_feedback, awb_gains):
         print("   - 3A Stats    - AWB Bgain = ", awb_gains[1])
 
     # Logs for AE
-    if ae_feedback is None:
+    if ae_result is None:
         print("   - 3A Stats    - AE is Disable")
+        return
+    if ae_result["converged"]:
+        verdict = "Correct Exposure"
+    elif ae_result["ev_err"] > 0:
+        verdict = "Underexposed"
     else:
-        if ae_feedback < 0:
-            print("   - 3A Stats    - AE Feedback = Underexposed")
-        elif ae_feedback > 0:
-            print("   - 3A Stats    - AE Feedback = Overexposed")
-        else:
-            print("   - 3A Stats    - AE Feedback = Correct Exposure")
+        verdict = "Overexposed"
+    print(
+        "   - 3A Stats    - AE Metered Mean = ",
+        f"{ae_result['vm']:.1f} (target {ae_result['target_mean']})",
+    )
+    print(f"   - 3A Stats    - AE Exposure Error = {ae_result['ev_err']:+.2f} EV -> {verdict}")
+    print("   - 3A Stats    - AE Digital Gain (next frame) = ", ae_result["gain"])
 
 
 def reconstruct_yuv_from_422_custom(yuv_422_custom, width, height):

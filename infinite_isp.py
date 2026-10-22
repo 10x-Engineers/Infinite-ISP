@@ -22,6 +22,8 @@ from modules.black_level_correction.black_level_correction import (
 )
 from modules.oecf.oecf import OECF
 from modules.digital_gain.digital_gain import DigitalGain as DG
+from modules.auto_exposure.auto_exposure_stats import AutoExposureStats as AES
+from modules.auto_exposure.auto_exposure import AutoExposure as AE, new_ae_state
 from modules.lens_shading_correction.lens_shading_correction import (
     LensShadingCorrection as LSC,
 )
@@ -35,7 +37,6 @@ from modules.color_correction_matrix.color_correction_matrix import (
     ColorCorrectionMatrix as CCM,
 )
 from modules.gamma_correction.gamma_correction import GammaCorrection as GC
-from modules.auto_exposure.auto_exposure import AutoExposure as AE
 from modules.color_space_conversion.color_space_conversion import (
     ColorSpaceConversion as CSC,
 )
@@ -79,6 +80,8 @@ class InfiniteISP:
             # Get isp module params
             self.parm_dpc = c_yaml["dead_pixel_correction"]
             self.parm_dga = c_yaml["digital_gain"]
+            self.parm_aes = c_yaml["auto_exposure_stats"]
+            self.parm_ae = c_yaml["auto_exposure"]
             self.parm_lsc = c_yaml["lens_shading_correction"]
             self.parm_bnr = c_yaml["bayer_noise_reduction"]
             self.parm_blc = c_yaml["black_level_correction"]
@@ -86,7 +89,6 @@ class InfiniteISP:
             self.parm_wbc = c_yaml["white_balance"]
             self.parm_awb = c_yaml["auto_white_balance"]
             self.parm_dem = c_yaml["demosaic"]
-            self.parm_ae = c_yaml["auto_exposure"]
             self.parm_ccm = c_yaml["color_correction_matrix"]
             self.parm_gmc = c_yaml["gamma_correction"]
             self.parm_csc = c_yaml["color_space_conversion"]
@@ -101,6 +103,10 @@ class InfiniteISP:
             self.c_yaml = c_yaml
 
             self.platform["rgb_output"] = self.parm_rgb["is_enable"]
+
+            # AE control memory carried from frame to frame (video), as in the firmware
+            self.ae_state = new_ae_state()
+            self.ae_temporal = True
 
         # add rgb_output_conversion module
 
@@ -168,6 +174,20 @@ class InfiniteISP:
         dga_raw, self.dga_current_gain = dga.execute()
 
         # =====================================================================
+        # Auto Exposure statistics - on the linear raw after digital gain (which
+        # stands in for the sensor exposure), before noise reduction
+        aes = AES(dga_raw, self.sensor_info, self.parm_aes)
+        self.ae_stats = aes.execute()
+
+        # =====================================================================
+        # Auto Exposure control (EV law) - the digital gain for the next frame,
+        # from this frame's statistics
+        aec = AE(
+            self.ae_stats, self.parm_ae, self.parm_dga, self.ae_state, self.ae_temporal
+        )
+        self.ae_result = aec.execute()
+
+        # =====================================================================
         # Lens shading correction
         lsc = LSC(dga_raw, self.platform, self.sensor_info, self.parm_lsc)
         lsc_raw = lsc.execute()
@@ -201,11 +221,6 @@ class InfiniteISP:
         # Gamma
         gmc = GC(ccm_img, self.platform, self.sensor_info, self.parm_gmc)
         gamma_raw = gmc.execute()
-
-        # =====================================================================
-        # Auto-Exposure
-        aef = AE(gamma_raw, self.sensor_info, self.parm_ae)
-        self.ae_feedback = aef.execute()
 
         # =====================================================================
         # Color space conversion
@@ -327,14 +342,19 @@ class InfiniteISP:
         start = time.time()
 
         if not self.render_3a:
-            # Run ISP-Pipeline once
+            # Run ISP-Pipeline once; the AE control keeps its frame-to-frame memory,
+            # so a sequence of frames (video) behaves as with the firmware
+            self.ae_temporal = True
             self.run_pipeline(visualize_output=True)
-            # Display 3A Statistics
         else:
-            # Run ISP-Pipeline till Correct Exposure with AWB gains
+            # Run ISP-Pipeline till Correct Exposure with AWB gains: this frame
+            # converges on its own, and re-processing it has no temporal noise to filter
+            self.ae_state = new_ae_state()
+            self.ae_temporal = False
             self.execute_with_3a_statistics()
 
-        util.display_ae_statistics(self.ae_feedback, self.awb_gains)
+        # Display 3A Statistics
+        util.display_ae_statistics(self.ae_result, self.awb_gains)
 
         # Print Logs to mark end of pipeline Execution
         print(50 * "-" + "\n")
@@ -354,34 +374,35 @@ class InfiniteISP:
             self.parm_wbc["b_gain"] = self.c_yaml["white_balance"]["b_gain"] = float(
                 self.awb_gains[1]
             )
-        if ae_on is True and self.parm_dga["is_auto"] and self.parm_ae["is_enable"]:
-            self.parm_dga["ae_feedback"] = self.c_yaml["digital_gain"][
-                "ae_feedback"
-            ] = self.ae_feedback
+        if ae_on is True and self.parm_dga["is_auto"] and self.ae_result is not None:
+            # the AE control chooses the digital gain for the next frame
             self.parm_dga["current_gain"] = self.c_yaml["digital_gain"][
                 "current_gain"
-            ] = self.dga_current_gain
+            ] = self.ae_result["gain_index"]
 
     def execute_with_3a_statistics(self):
         """
         Execute Infinite-ISP with AWB gains and correct exposure
         """
 
-        # Maximum Iterations depend on total permissible gains.
-        # Use the last valid gain index, as Digital Gain clamps to it
-        max_dg = len(self.parm_dga["gain_array"]) - 1
+        # Every AE move changes the gain index by at least one step, so a converging
+        # loop visits each gain at most twice - the bound only stops a cycle
+        max_iterations = 2 * len(self.parm_dga["gain_array"])
 
-        # Run ISP-Pipeline
+        # Run ISP-Pipeline until the AE control holds the gain (converged, or the
+        # gain array cannot get closer to the target)
         self.run_pipeline(visualize_output=False)
         self.load_3a_statistics()
-        while not (
-            (self.ae_feedback == 0)
-            or (self.ae_feedback == -1 and self.dga_current_gain == max_dg)
-            or (self.ae_feedback == 1 and self.dga_current_gain == 0)
-            or self.ae_feedback is None
+        iterations = 1
+        while (
+            self.ae_result is not None
+            and self.ae_result["moved"]
+            and iterations < max_iterations
         ):
             self.run_pipeline(visualize_output=False)
             self.load_3a_statistics()
+            iterations += 1
+        print(f"   - 3A Stats    - AE loop: {iterations} pipeline run(s)")
 
         self.run_pipeline(visualize_output=True)
 

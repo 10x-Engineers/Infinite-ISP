@@ -1,122 +1,217 @@
 """
 File: auto_exposure.py
-Description: 3A-AE Runs the Auto exposure algorithm in a loop
-Code / Paper  Reference: https://www.atlantis-press.com/article/25875811.pdf
-                         http://tomlr.free.fr/Math%E9matiques/Math%20Complete/Probability%20and%20statistics/CRC%20-%20standard%20probability%20and%20Statistics%20tables%20and%20formulae%20-%20DANIEL%20ZWILLINGER.pdf
+Description: 3A-AE control - EV-law algorithm. Once per frame: meters a
+             clip-corrected, centre-weighted green mean from the AE statistics,
+             compares it against a target in EV (log2) terms, protects against
+             blown highlights / clipping / an already-dark frame, and moves the
+             digital gain towards that target with a damped, slew-limited step - a
+             deadband (widened by hysteresis once converged) holds the gain once
+             it's close enough. Replaces the histogram-skewness AE.
+
+             This is the algorithm-design counterpart of the fixed-point EV-law
+             control in Infinite-ISP_ReferenceModel: same algorithm (meter / decide
+             / actuate, same caps and bracket-hold), but worked directly in floating
+             point and plain EV units - no Q8 fixed-point scaling, register-width
+             checks or hardware-shaped bit tricks, since none of that is needed here.
+Code / Paper  Reference:
 Author: 10xEngineers Pvt Ltd
 ------------------------------------------------------------
 """
 import time
-import numpy as np
+import math
+
+
+def new_ae_state():
+    """The block's memory, carried frame to frame: the filtered metered brightness,
+    the convergence flag, and the gain-ladder bracket-hold bookkeeping."""
+    return {
+        "vm_filt": None,
+        "converged": False,
+        "came_from": None,
+        "age": 0,
+        "hold": None,
+    }
 
 
 class AutoExposure:
     """
-    Auto Exposure Module
+    Auto Exposure control (EV law)
     """
 
-    def __init__(self, img, sensor_info, parm_ae):
-        self.img = img
+    def __init__(self, ae_stats, parm_ae, parm_dga, state, temporal):
+        self.stats = ae_stats
         self.enable = parm_ae["is_enable"]
         self.is_debug = parm_ae["is_debug"]
-        self.center_illuminance = parm_ae["center_illuminance"]
-        self.histogram_skewness_range = parm_ae["histogram_skewness"]
-        self.sensor_info = sensor_info
-        self.param_ae = parm_ae
-        self.bit_depth = sensor_info["bit_depth"]
+        self.prm = parm_ae
+        self.weights = parm_ae["grid_weights"]
+        self.gains = list(parm_dga["gain_array"])
+        self.gain_index = int(parm_dga["current_gain"])
+        self.state = state
+        # temporal=False is used for render_3a: the same frame is re-processed to
+        # converge, so there is no real frame-to-frame history to smooth against
+        self.temporal = temporal
+        if self.enable and self.stats is None:
+            raise ValueError(
+                "auto_exposure needs the AE statistics: set "
+                "auto_exposure_stats.is_enable to true."
+            )
 
-        # Pipeline modules included in AE Feedback Loop
-        # (White Balance) wb module is renamed to wbc (white balance correction)
-        # gc (Gamma Correction) module is renamed to gcm (Gamma Correction Module)
+    # ------------------------------------------------------------------ 1. meter
+    def meter(self):
+        """Clip-corrected, centre-weighted green mean + frame-wide fractions."""
+        prm = self.prm
+        acc = wsum = 0.0
+        hi_cnt = wc_cnt = dk_cnt = g_tot = p_tot = 0
+        for cell, weight in zip(self.stats, self.weights):
+            g_tot += cell["green_count"]
+            p_tot += cell["pixel_count"]
+            hi_cnt += cell["highlight_count"]
+            wc_cnt += cell["white_clip_count"]
+            dk_cnt += cell["shadow_count"]
 
-    def get_exposure_feedback(self):
-        """
-        Get Correct Exposure by Adjusting Digital Gain
-        """
-        # Convert Image into 8-bit for AE Calculation
-        self.img = self.img >> (self.bit_depth - 8)
-        self.bit_depth = 8
+            if cell["valid_green_count"] < cell["green_count"] * prm["valid_min_pct"] / 100:
+                continue
+            acc += cell["valid_green_mean"] * weight
+            wsum += weight
 
-        # calculate the exposure metric
-        return self.determine_exposure()
+        g_tot, p_tot = max(1, g_tot), max(1, p_tot)
+        return {
+            "valid": wsum > 0,
+            "vm": acc / wsum if wsum else 0.0,
+            "hi_frac_pm": 1000 * hi_cnt / g_tot,
+            "dark_frac_pm": 1000 * dk_cnt / g_tot,
+            "clip_frac_pm": 1000 * wc_cnt / p_tot,
+        }
 
-    def determine_exposure(self):
-        """
-        Image Exposure Estimation using Skewness Luminance of Histograms
-        """
+    # ------------------------------------------------------------------ 2. decide
+    def decide(self, mtr):
+        """Decision: (ev_want, ev_move) in EV; ev_move == 0 means hold."""
+        prm, state = self.prm, self.state
 
-        # plt.imshow(self.img)
-        # plt.show()
-
-        # For Luminance Histograms, Image is first converted into greyscale image
-        # Function also returns average luminance of image which is used as AE-Stat
-        grey_img, avg_lum = self.get_greyscale_image(self.img)
-        print("Average luminance is = ", avg_lum)
-
-        # Histogram skewness Calculation for AE Stats
-        skewness = self.get_luminance_histogram_skewness(grey_img)
-
-        # get the ranges
-        upper_limit = self.histogram_skewness_range
-        lower_limit = -1 * upper_limit
-
-        if self.is_debug:
-            print("   - AE - Histogram Skewness Range = ", upper_limit)
-
-        # see if skewness is within range
-        if skewness < lower_limit:
-            return -1
-        elif skewness > upper_limit:
-            return 1
+        # smooth the metered mean across frames (skipped for render_3a: see __init__)
+        iir_a = prm["vm_iir_a"] if self.temporal else 100
+        vm = mtr["vm"] if mtr["vm"] else 1.0
+        if state["vm_filt"] is None:
+            state["vm_filt"] = vm
         else:
-            return 0
+            state["vm_filt"] += (vm - state["vm_filt"]) * iir_a / 100
+        vmf = max(1.0, state["vm_filt"])
 
-    def get_greyscale_image(self, img):
-        """
-        Conversion of an Image into Greyscale Image
-        """
-        # Each RGB pixels with [0.299, 0.587, 0.144] to get its luminance
-        grey_img = np.clip(
-            np.dot(img[..., :3], [0.299, 0.587, 0.144]), 0, (2**self.bit_depth)
-        ).astype(np.uint16)
-        return grey_img, np.average(grey_img, axis=(0, 1))
+        if not mtr["valid"]:
+            # no cell had enough unclipped greens to meter - move cautiously
+            ev_want = (
+                -prm["ev_slew_max"]
+                if mtr["clip_frac_pm"] > mtr["dark_frac_pm"]
+                else prm["ev_slew_max"]
+            )
+        else:
+            ev_mean = math.log2(prm["target_mean"]) - math.log2(vmf)
+            ev_want = ev_mean
+            # highlight / clip protection: only ever pulls the request darker
+            if mtr["hi_frac_pm"]:
+                over = math.log2(mtr["hi_frac_pm"]) - math.log2(prm["hi_frac_pm"])
+                ev_want = min(ev_want, -(over * prm["hi_k"] / 100))
+            if mtr["clip_frac_pm"]:
+                over = math.log2(mtr["clip_frac_pm"]) - math.log2(prm["clip_frac_pm"])
+                ev_want = min(ev_want, -(over * prm["clip_k"] / 100))
+            # the caps above can't pull more than ev_max_pull below the plain target
+            ev_want = max(ev_want, ev_mean - prm["ev_max_pull"])
+            # never darken a frame that's already mostly dark
+            if mtr["dark_frac_pm"] > prm["dark_frac_pm"] and ev_want < 0:
+                ev_want = 0.0
 
-    def get_luminance_histogram_skewness(self, img):
-        """
-        Skewness Calculation in reference to:
-        Zwillinger, D. and Kokoska, S. (2000). CRC Standard Probability and Statistics
-        Tables and Formulae. Chapman & Hall: New York. 2000. Section 2.2.24.1
-        """
+        band = prm["ev_deadband"] + (prm["ev_hyst"] if state["converged"] else 0)
+        if abs(ev_want) <= band:
+            state["converged"] = True
+            return ev_want, 0.0
+        state["converged"] = False
 
-        # First subtract central luminance to calculate skewness around it
-        img = img.astype(np.float64) - self.center_illuminance
+        damp, slew = prm["ev_damp"], prm["ev_slew_max"]
+        if abs(ev_want) > prm["scene_change_ev"]:
+            damp, slew = prm["ev_damp_fast"], prm["ev_slew_fast"]
+        ev_move = max(-slew, min(slew, ev_want * damp / 100))
+        return ev_want, ev_move
 
-        # The sample skewness is computed as the Fisher-Pearson coefficient of
-        # skewness, i.e. (m_3 / m_2**(3/2)) * g_1
-        # where m_2 is 2nd moment (variance) and m_3 is third moment skewness
+    # ------------------------------------------------------------------ 3. actuate
+    def gain_ev(self, index):
+        """EV of a gain-table entry (gain = 1 is the 0 EV reference point)."""
+        return math.log2(self.gains[index])
 
-        img_size = img.size
-        m_2 = np.sum(np.power(img, 2)) / img_size
-        m_3 = np.sum(np.power(img, 3)) / img_size
+    def actuate(self, mtr, ev_want, ev_move):
+        """Move along the gain table towards ev_move, without oscillating when the
+        ideal gain falls between two adjacent table entries (see auto_exposure.py's
+        module docstring / the AE walkthrough for why the bracket-hold is needed)."""
+        cur, state, prm = self.gain_index, self.state, self.prm
+        over = mtr["hi_frac_pm"] > prm["hi_frac_pm"] or mtr["clip_frac_pm"] > prm["clip_frac_pm"]
+        ev_raw = math.log2(max(1.0, mtr["vm"]))
 
-        g_1 = np.sqrt(img_size * (img_size - 1)) / (img_size - 2)
-        skewness = np.nan_to_num((m_3 / abs(m_2) ** (3 / 2)) * g_1)
+        best = cur
+        if ev_move != 0:
+            aim = self.gain_ev(cur) + ev_move
+            best = min(range(len(self.gains)), key=lambda k: abs(self.gain_ev(k) - aim))
+            if best == cur:
+                # the table can't reach the aim point - still take one step if it
+                # lands closer to the full (undamped) target
+                step = cur + (1 if ev_move > 0 else -1)
+                target = self.gain_ev(cur) + ev_want
+                if 0 <= step < len(self.gains) and abs(self.gain_ev(step) - target) < abs(
+                    self.gain_ev(cur) - target
+                ):
+                    best = step
 
-        if self.is_debug:
-            print("   - AE - Histogram Skewness = ", skewness)
+        # an "end" of a bracket: (gain index, ev_want, over budget, raw metered EV)
+        entry = (cur, ev_want, over, ev_raw)
+        hold, came = state["hold"], state["came_from"]
+        if hold and hold[0] == cur and abs(ev_raw - hold[2]) > prm["ev_deadband"]:
+            hold = came = None  # the scene moved on: release the hold
+        if hold and hold[0] == cur and best == hold[1]:
+            best = cur  # still bracketed between the same two gains: stay put
+        elif came and best != cur and best == came[0] and (came[1] > 0) != (ev_want > 0):
+            # about to bounce back to where we came from - settle the bracket
+            entry_darker = self.gains[entry[0]] <= self.gains[came[0]]
+            darker, brighter = (entry, came) if entry_darker else (came, entry)
+            pick = darker if brighter[2] or abs(darker[1]) <= abs(brighter[1]) else brighter
+            if pick is came or state["age"] == 1:
+                other = brighter if pick is darker else darker
+                hold, best = (pick[0], other[0], pick[3]), pick[0]
 
-        return skewness
+        if best != cur:
+            came, state["age"] = entry, 0
+        state["age"] = min(state["age"] + 1, 3)
+        state["hold"], state["came_from"] = hold, came
+        return best
 
     def execute(self):
         """
-        Execute Auto Exposure
+        Execute AE: returns the decision for the next frame, or None when disabled
         """
-        print("Auto Exposure= " + str(self.enable))
-
-        if self.enable is False:
+        print("Auto Exposure (EV law) = " + str(self.enable))
+        if not self.enable:
             return None
-        else:
-            start = time.time()
-            ae_feedback = self.get_exposure_feedback()
-            print(f"  Execution time: {time.time()-start:.3f}s")
-            return ae_feedback
+        start = time.time()
+        mtr = self.meter()
+        ev_want, ev_move = self.decide(mtr)
+        index = self.actuate(mtr, ev_want, ev_move)
+        result = dict(
+            mtr,
+            target_mean=self.prm["target_mean"],
+            ev_err=ev_want,
+            ev_move=ev_move,
+            converged=self.state["converged"],
+            gain_index=index,
+            gain=self.gains[index],
+            moved=index != self.gain_index,
+        )
+        if self.is_debug:
+            print(f"   - AE - metered mean / target   = {mtr['vm']:.1f} / {self.prm['target_mean']}")
+            print(
+                f"   - AE - highlight/clip/dark     = "
+                f"{mtr['hi_frac_pm']:.1f}/{mtr['clip_frac_pm']:.1f}/{mtr['dark_frac_pm']:.1f} per mille"
+            )
+            print(f"   - AE - EV error / move         = {ev_want:+.3f} / {ev_move:+.3f} EV")
+            print(
+                f"   - AE - digital gain             = "
+                f"{self.gains[self.gain_index]} -> {self.gains[index]}"
+            )
+        print(f"  Execution time: {time.time() - start:.3f}s")
+        return result
