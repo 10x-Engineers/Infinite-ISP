@@ -128,10 +128,6 @@ color_space_conversion:
   # Bt.601/4407 = 2
   is_save: false
 
-color_saturation_enhancement:
-  is_enable: true
-  saturation_gain: 1.5
-
 
 ldci:
   is_enable: false

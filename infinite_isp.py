@@ -90,7 +90,6 @@ class InfiniteISP:
             self.parm_ccm = c_yaml["color_correction_matrix"]
             self.parm_gmc = c_yaml["gamma_correction"]
             self.parm_csc = c_yaml["color_space_conversion"]
-            self.parm_cse = c_yaml["color_saturation_enhancement"]
             self.parm_ldci = c_yaml["ldci"]
             self.parm_sha = c_yaml["sharpen"]
             self.parm_2dn = c_yaml["2d_noise_reduction"]
@@ -209,7 +208,7 @@ class InfiniteISP:
 
         # =====================================================================
         # Color space conversion
-        csc = CSC(gamma_raw, self.platform, self.sensor_info, self.parm_csc, self.parm_cse )
+        csc = CSC(gamma_raw, self.platform, self.sensor_info, self.parm_csc)
         csc_img = csc.execute()
 
         # =====================================================================
