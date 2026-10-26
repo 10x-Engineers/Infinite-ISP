@@ -181,7 +181,7 @@ class InfiniteISP:
         self.ae_stats = aes.execute()
 
         # =====================================================================
-        # Auto Exposure control (HDR-ISP firmware EV law) - the digital gain for
+        # Auto Exposure control (EV-law firmware) - the digital gain for
         # the next frame, from this frame's statistics
         aec = AE(self.ae_stats, self.sensor_info, self.parm_ae, self.parm_dga,
                  self.ae_state, self.ae_temporal)

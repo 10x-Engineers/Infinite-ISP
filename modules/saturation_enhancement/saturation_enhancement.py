@@ -1,13 +1,13 @@
 """
 File: saturation_enhancement.py
-Description: Saturation enhancement in YUV (ported from HDR-ISP).  Runs after 2D noise
+Description: Saturation enhancement in YUV.  Runs after 2D noise
              reduction, before RGB conversion.
 
 Two algorithms, selected by the config key `algorithm`:
 
   - "global"      : Cb and Cr scaled by one gain, quantised to the RTL's SAT_GAIN
                     register (12-bit unsigned Q4.8, truncated) - the same result as
-                    the fixed-point reference model and the RTL (axis_sat).  Simple
+                    the fixed-point reference model and RTL.  Simple
                     and cheap, but it amplifies CCM errors uniformly and ignores
                     luminance and hue.
 
@@ -20,9 +20,10 @@ Two algorithms, selected by the config key `algorithm`:
                     roll off to white, shadow noise is not coloured.
 
 Chroma is centred at 128, the offset Infinite-ISP's colour space conversion adds and
-its RGB conversion removes (HDR-ISP's pipeline centres it at 127).  Y is never changed.
+its RGB conversion removes (the reference firmware's pipeline centres it at 127).
+Y is never changed.
 
-Code / Paper  Reference: HDR-ISP Reference Model modules/saturation_enhancement.py
+Code / Paper  Reference: Infinite-ISP_ReferenceModel modules/saturation_enhancement.py
 Author: 10xEngineers Pvt Ltd
 ------------------------------------------------------------
 """

@@ -1,7 +1,7 @@
 """
 File: auto_exposure.py
-Description: 3A-AE - the HDR-ISP firmware auto-exposure control law (ae_ctrl.c, "EV
-             law"), driving Infinite-ISP's digital gain.
+Description: 3A-AE - an EV-law auto-exposure control law, driving Infinite-ISP's
+             digital gain.
 
              Input: the AE statistics block (auto_exposure_stats).  Per frame:
 
@@ -26,11 +26,11 @@ Description: 3A-AE - the HDR-ISP firmware auto-exposure control law (ae_ctrl.c, 
                 budget) instead of alternating; when the ladder cannot get closer
                 the loop has converged as far as the gains allow.
 
-             Integer arithmetic and the Q8 log2 follow the firmware (mirrored in
-             HDR-ISP verify/ae_loop_sim.py), generalised from the firmware's fixed
-             10-bit, fixed-grid constants to this frame's bit depth and grid.
+             Integer arithmetic and the Q8 log2 follow a reference firmware model,
+             generalised from the firmware's fixed 10-bit, fixed-grid constants to
+             this frame's bit depth and grid.
 
-Code / Paper  Reference: HDR-ISP firmware ae_ctrl.c (AE_CTRL_V2) / verify/ae_loop_sim.py
+Code / Paper  Reference: EV-law auto-exposure control firmware
 Author: 10xEngineers Pvt Ltd
 ------------------------------------------------------------
 """
@@ -175,7 +175,7 @@ class AutoExposure:
         A), the error having changed sign - possibly after dwelling at B for a few
         frames while the mean's IIR catches up.  That bracket is settled on the end
         with the smaller error - never on the brighter end if it breaks the
-        highlight or clip budget (HDR-ISP's default: protect highlights) - and held
+        highlight or clip budget (the default policy: protect highlights) - and held
         while the scene stays put: the RAW metered mean at the held gain within the
         deadband (the filtered error still drifts for frames after a move, so it
         cannot tell a scene change from the filter catching up).  The reference of

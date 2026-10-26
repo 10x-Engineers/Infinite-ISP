@@ -60,24 +60,24 @@ digital_gain:
   is_save: false
 
 auto_exposure_stats:
-  # HDR-ISP AE statistics block, on the linear raw after digital gain (before LSC / BNR)
+  # AE statistics block, on the linear raw after digital gain (before LSC / BNR)
   is_enable: true
   is_debug: true
   # 3x3 grid: 4 column / 4 row boundaries in pixels, the last = frame width / height
   col_starts: [0, 864, 1728, 2592]
   row_starts: [0, 512, 1024, 1536]
   # green-pixel level thresholds, DN at the sensor bit depth
-  # (HDR-ISP at 10 bit: 50 / 950 = 4.9 % / 93 % of full scale)
+  # (reference firmware at 10 bit: 50 / 950 = 4.9 % / 93 % of full scale)
   shadow_threshold: 200
   highlight_threshold: 3803
   is_save: false
 
 auto_exposure:
-  # 3A-AE: HDR-ISP firmware AE control law (ae_ctrl.c, EV law) choosing the digital
+  # 3A-AE: EV-law AE control firmware choosing the digital
   # gain (digital_gain.is_auto must be true).  EV values in Q8: 256 = 1 EV
   is_enable: true
   is_debug: true
-  target_mean: 801         # metered green mean target, DN (HDR-ISP: 200 at 10 bit)
+  target_mean: 801         # metered green mean target, DN (reference firmware: 200 at 10 bit)
   valid_min_pct: 10        # a grid cell needs this % of unclipped greens to be metered
   grid_weights: [1, 2, 1, 2, 4, 2, 1, 2, 1]   # centre-weighted metering
   ev_deadband: 38          # |error| <= 0.15 EV: hold
@@ -178,7 +178,7 @@ sharpen:
   is_save: false
   
 saturation_enhancement:
-  # HDR-ISP saturation enhancement, YUV after 2D noise reduction
+  # Saturation enhancement, YUV after 2D noise reduction
   is_enable: true
   algorithm: "global"      # global (one Q4.8 gain on Cb/Cr, as the RTL) or hue_rolloff
   saturation_gain: 1.5

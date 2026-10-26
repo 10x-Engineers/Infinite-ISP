@@ -73,11 +73,11 @@ InfiniteISP also tries to simulate the **3A-Algorithms**.
 | CFA Interpolation                             | [Malwar He Cutler’s](https://www.ipol.im/pub/art/2011/g_mhcd/article.pdf ) demosaicing algo  | Yes <br> - Malvar He Cutler|
 | **3A - Algorithms**                           | **AE & AWB** | ---- |
 | Auto White Balance                            | - [Grey World](https://www.sciencedirect.com/science/article/abs/pii/0016003280900587) <br> - [Norm 2](https://library.imaging.org/admin/apis/public/api/ist/website/downloadArticle/cic/12/1/art00008) <br> - [PCA algorithm](https://opg.optica.org/josaa/viewmedia.cfm?uri=josaa-31-5-1049&seq=0) | ---- |
-| Auto Exposure                                 | HDR-ISP AE: <br> - per-grid statistics on the linear raw (green-only luma, clip counts) <br> - firmware EV-law control choosing the digital gain | ---- |
+| Auto Exposure                                 | EV-law AE: <br> - per-grid statistics on the linear raw (green-only luma, clip counts) <br> - firmware EV-law control choosing the digital gain | ---- |
 | Color Correction Matrix                       | Calibration / sensor dependent <br> - 3x3 CCM from config  | Yes <br> - 4x3 CCM  |
 | Gamma Tone Mapping                            | Gamma LUT in RGB from config file  | Yes <br> - YUV and RGB domain|
 | Color Space Conversion                        | YCbCr digital <br> - BT 601 <br> - Bt 709  <br>   | Yes <br> - YUV analogue |
-| Saturation Enhancement                        | HDR-ISP saturation enhancement on YUV after 2D noise reduction <br> - `global` Q4.8 chroma gain (the RTL register) <br> - `hue_rolloff` hue-selective gain with luminance roll-off | Yes|
+| Saturation Enhancement                        | Saturation enhancement on YUV after 2D noise reduction <br> - `global` Q4.8 chroma gain (the RTL register) <br> - `hue_rolloff` hue-selective gain with luminance roll-off | Yes|
 | Contrast Enhancement                          | Modified [contrast limited adaptive histogram equalization](https://arxiv.org/ftp/arxiv/papers/2108/2108.12818.pdf#:~:text=The%20technique%20to%20equalize%20the,a%20linear%20trend%20(CDF))  | ---- |
 | Edge Enhancement / Sharpeining                | Simple unsharp masking with strength control | Yes | 
 | Noise Reduction                               | [Non-local means filter](https://www.ipol.im/pub/art/2011/bcm_nlm/article.pdf) | Yes <br> - NLM filter <br> - Bilateral noise filter|
@@ -265,7 +265,7 @@ To be implemented
 
 ### Auto Exposure Statistics
 
-HDR-ISP's AE statistics block. It runs on the linear raw after digital gain, before lens shading correction and noise reduction, on a 3x3 grid. Per cell: green pixels below / above the two thresholds, the sum of green values, and pixels (any channel) at 0 / full scale.
+The AE statistics block. It runs on the linear raw after digital gain, before lens shading correction and noise reduction, on a 3x3 grid. Per cell: green pixels below / above the two thresholds, the sum of green values, and pixels (any channel) at 0 / full scale.
 
 | auto_exposure_stats | Details |
 | -----------         |   ---   |
@@ -279,7 +279,7 @@ HDR-ISP's AE statistics block. It runs on the linear raw after digital gain, bef
 
 ### 3A - Auto Exposure
 
-HDR-ISP's firmware AE control law (EV law). It meters a clip-corrected, centre-weighted green mean from the statistics and moves the exposure by `log2(target_mean / mean)` EV, capped when highlights or clipping exceed their budgets and never darker when most of the frame is dark. The move is applied as the nearest gain in `digital_gain.gain_array`; a target that falls between two gains is settled on one of them (the smaller error, never a brighter gain that breaks the highlight or clip budget) instead of alternating. With `render_3a` the pipeline repeats until the gain holds. EV values are in Q8 (256 = 1 EV).
+The EV-law AE control law. It meters a clip-corrected, centre-weighted green mean from the statistics and moves the exposure by `log2(target_mean / mean)` EV, capped when highlights or clipping exceed their budgets and never darker when most of the frame is dark. The move is applied as the nearest gain in `digital_gain.gain_array`; a target that falls between two gains is settled on one of them (the smaller error, never a brighter gain that breaks the highlight or clip budget) instead of alternating. With `render_3a` the pipeline repeats until the gain holds. EV values are in Q8 (256 = 1 EV).
 
 | auto_exposure      | Details |
 |--------------------|---------|
@@ -397,7 +397,7 @@ To be implemented
 
 ### Saturation Enhancement
 
-HDR-ISP's saturation enhancement, on the YUV image after 2D noise reduction. Y is never changed.
+Saturation enhancement, on the YUV image after 2D noise reduction. Y is never changed.
 
 | saturation_enhancement | Details |
 |------------------------|---------|

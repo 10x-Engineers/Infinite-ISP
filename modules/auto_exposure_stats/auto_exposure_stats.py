@@ -1,6 +1,6 @@
 """
 File: auto_exposure_stats.py
-Description: AE statistics block (ported from HDR-ISP) - five statistics per cell
+Description: AE statistics block - five statistics per cell
              of a configurable 3x3 grid, computed on the linear Bayer raw.
 
              Per grid cell:
@@ -17,12 +17,12 @@ Description: AE statistics block (ported from HDR-ISP) - five statistics per cel
              pixel between them is in neither count.
 
              Where it runs: on the digital-gain output - linear, black-level
-             corrected, before LSC and noise reduction.  In HDR-ISP the block taps
-             the BLC output because the firmware AE moves the sensor exposure; in
-             Infinite-ISP digital gain stands in for the sensor exposure, so the
-             statistics must see it.
+             corrected, before LSC and noise reduction.  In the reference firmware
+             the block taps the BLC output because the AE moves the sensor
+             exposure; in Infinite-ISP digital gain stands in for the sensor
+             exposure, so the statistics must see it.
 
-Code / Paper  Reference: HDR-ISP Reference Model modules/auto_exposure_stats.py
+Code / Paper  Reference: Infinite-ISP_ReferenceModel modules/auto_exposure_stats.py
 Author: 10xEngineers Pvt Ltd
 ------------------------------------------------------------
 """

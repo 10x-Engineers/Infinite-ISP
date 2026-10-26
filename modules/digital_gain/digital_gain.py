@@ -2,7 +2,7 @@
 File: digital_gain.py
 Description: Applies the digital gain gain_array[current_gain].  With is_auto, the
 auto-exposure control (EV law) chooses current_gain for the next frame - digital gain
-stands in for the sensor exposure that the HDR-ISP firmware AE moves.
+stands in for the sensor exposure that the firmware AE moves.
 Code / Paper  Reference:
 Author: 10xEngineers Pvt Ltd
 ------------------------------------------------------------
