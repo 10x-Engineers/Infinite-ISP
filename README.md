@@ -47,7 +47,7 @@ Infinite-ISP Algorithm Design is a collections of camera pipeline modules implem
 
 ![](assets/infinite-isp-architecture-initial.png)
 
-ISP pipeline for `Infinite-ISP v1.1`
+ISP pipeline for `Infinite-ISP v2.0.0`
 
 ## Objectives
 Many open-source ISPs are available over the internet. Most of them are developed by individual contributors, each having its strengths. This project aims to centralize all the open-source ISP development to a single place enabling all the ISP developers to have a single platform to contribute. InfiniteISP will not only contain the conventional algorithms but aims to contain state-of-the-art deep learning algorithms as well, enabling a clean comparison between the two. This project has no bounds to ideas and is aimed to include any algorithm that improves the overall results of the pipeline regardless of their complexity.
@@ -99,7 +99,7 @@ The project assumes pip package manager as a pre-requisite.
 Follow the following steps to run the pipeline
 1.  Clone the repo using 
 ```shell
-git clone https://github.com/10xEngineersTech/Infinite-ISP_ReferenceModel
+git clone https://github.com/10x-Engineers/Infinite-ISP
 ```
 
 2.  Install all the requirements from the requirements file by running
@@ -162,7 +162,7 @@ Please refer to  the provided [instructions](test_vector_generation/README.md) f
 
 ## Contributing
 
-Please read the [Contribution Guidelines](docs/CONTRIBUTIONS.md) before making a Pull Request
+Please read the [Contribution Guidelines](CONTRIBUTIONS.md) before making a Pull Request
 
 ## Results
 Here are the results of this pipeline compared with a market competitive ISP. 
@@ -180,11 +180,11 @@ A comparison of the above results based on PSNR and SSIM image quality metrics
 
 | Images    | PSNR  | SSIM  |
 |-----------|-------|-------|
-| Indoor1   |20.0974     |0.8599
-|Outdoor1   |21.8669     |0.9277
-|Outdoor2   |20.3430     |0.8384
-|Outdoor3   |19.3627     |0.8027 
-|Outdoor4   |20.7741     |0.8561
+| Indoor1   |22.4799     |0.9504
+|Outdoor1   |19.6513     |0.9365
+|Outdoor2   |19.6194     |0.8579
+|Outdoor3   |17.1132     |0.7639
+|Outdoor4   |23.3348     |0.9480
 
 ## User Guide
 
@@ -462,3 +462,6 @@ This project is licensed under Apache 2.0 (see [LICENSE](LICENSE) file).
 - [Mushfiqulalam - isp](https://github.com/mushfiqulalam/isp)
 - [Karaimer - A Software Platform for Manipulating the Camera Imaging Pipeline](https://karaimer.github.io/camera-pipeline)
 - [rawpy](https://github.com/letmaik/rawpy.git)
+- [AMD - Mini-ISP](https://github.com/amd/mini-isp)
+- [Brian Deegan - BrilliantISP](https://github.com/briandeegan82/brilliantISP)
+- [Mobile ISP Lab](https://github.com/Zseraphina/mobile-isp-lab)
