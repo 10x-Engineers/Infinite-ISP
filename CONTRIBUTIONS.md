@@ -128,7 +128,7 @@ Project maintainers have the right and responsibility to remove, edit, or reject
 
 
 ## License
-In short, when you submit code changes, your submissions are understood to be under the same [Apache 2.0 Lisence](LICENSE) that covers the project. Feel free to contact the maintainers if that's a concern.
+In short, when you submit code changes, your submissions are understood to be under the same [Apache 2.0 License](LICENSE) that covers the project. Feel free to contact the maintainers if that's a concern.
 License.
 
 ## References
