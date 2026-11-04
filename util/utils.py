@@ -447,3 +447,59 @@ def apply_cfa(img, bit_depth, bayer):
     demos_out = np.clip(demos_out, 0, 2**bit_depth - 1)
     demos_out = np.uint16(demos_out)
     return demos_out
+
+
+def get_bayer_channel_offsets(bayer):
+    """
+    Returns the (row, col) offset of the r, gr, gb and b pixels in the 2x2 bayer tile
+    """
+    offsets = {}
+    for index, color in enumerate(bayer):
+        row, col = divmod(index, 2)
+        # Gr shares its row with red, Gb shares its row with blue
+        if color == "g":
+            color = "gr" if "r" in bayer[2 * row : 2 * row + 2] else "gb"
+        offsets[color] = (row, col)
+    return offsets
+
+
+def bilinear_interp_weights(num_pixels, num_nodes):
+    """
+    Returns a (num_pixels x num_nodes) matrix of linear interpolation weights for
+    num_nodes grid nodes spread evenly from the first to the last pixel
+    """
+    weights = np.zeros((num_pixels, num_nodes))
+    if num_nodes == 1:
+        weights[:, 0] = 1
+        return weights
+
+    # Position of each pixel in grid units, its left node and the distance from it
+    position = np.arange(num_pixels) * (num_nodes - 1) / max(num_pixels - 1, 1)
+    left_node = np.minimum(np.floor(position).astype(int), num_nodes - 2)
+    frac = position - left_node
+
+    weights[np.arange(num_pixels), left_node] = 1 - frac
+    weights[np.arange(num_pixels), left_node + 1] = frac
+    return weights
+
+
+def lsc_gain_grids_from_flat_field(flat_raw, bayer, grid_rows, grid_cols):
+    """
+    Computes the lens shading correction gain grids from a flat-field raw image
+    (uniformly lit target, black level already subtracted). Returns a dict with
+    r_gain_grid, gr_gain_grid, gb_gain_grid and b_gain_grid as nested lists.
+    """
+    gain_grids = {}
+    for channel, (row, col) in get_bayer_channel_offsets(bayer).items():
+        plane = np.float64(flat_raw[row::2, col::2])
+        weight_y = bilinear_interp_weights(plane.shape[0], grid_rows)
+        weight_x = bilinear_interp_weights(plane.shape[1], grid_cols)
+
+        # Least-squares grid whose bilinear interpolation best fits the inverse of
+        # the flat field: averages out noise and uses every pixel, borders included
+        inverse = 1 / np.maximum(plane, 1)
+        fitted = np.linalg.pinv(weight_y) @ inverse @ np.linalg.pinv(weight_x).T
+
+        # Normalize so the brightest spot (the optical center) gets a gain of 1.0
+        gain_grids[channel + "_gain_grid"] = np.round(fitted / fitted.min(), 4).tolist()
+    return gain_grids
