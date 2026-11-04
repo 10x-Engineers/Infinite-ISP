@@ -67,7 +67,7 @@ InfiniteISP also tries to simulate the **3A-Algorithms**.
 | Optical Electronic Transfer Function (OECF)   | Calibration / sensor dependent <br> - Implements a LUT from config | ---- |
 | Anti Aliasing Filter                          | ----  | Yes |
 | Digital Gain                                  | Gains from config file | Brightness contrast control |
-| Lens Shading Correction                       | To Be Implemented  | ---- |
+| Lens Shading Correction                       | Calibration / sensor dependent <br> - Per-channel gain grids from config, bilinearly interpolated | ---- |
 | Bayer Noise Reduction                         | [Green Channel Guiding Denoising by Tan et al](https://www.researchgate.net/publication/261753644_Green_Channel_Guiding_Denoising_on_Bayer_Image)  | Chroma noise filtering |
 | White Balance                                 | WB gains from config file  | Yes |
 | CFA Interpolation                             | [Malwar He Cutler’s](https://www.ipol.im/pub/art/2011/g_mhcd/article.pdf ) demosaicing algo  | Yes <br> - Malvar He Cutler|
@@ -299,9 +299,18 @@ The EV-law AE control law. It meters a clip-corrected, centre-weighted green mea
 | dark_frac_pm       | Above this shadow fraction (per mille) the exposure is never reduced |
 | ev_max_pull        | The highlight / clip caps may pull at most this far below the mean's request (Q8 EV) |
 
-### Lens Shading Calibration 
+### Lens Shading Correction
 
-To be implemented
+Corrects lens shading (vignetting and color shading). Each bayer channel is multiplied by its own gain grid, bilinearly interpolated to every pixel. The grid nodes span the channel from its first to its last pixel, so any grid size can be used. The grids come from flat-field calibration: capture a uniformly lit flat target, subtract the black level and pass it to `util.utils.lsc_gain_grids_from_flat_field(flat_raw, bayer, grid_rows, grid_cols)`, which fits the gains by least squares and normalizes them to 1.0 at the brightest spot (the optical center).
+
+| lens_shading_correction | Details |
+| -----------             |   ---   |
+| is_enable               | Enables or disables this module |
+| r_gain_grid             | Red channel gain grid (rows x cols). Sensor and lens dependent, found by flat-field calibration |
+| gr_gain_grid            | Gr channel gain grid |
+| gb_gain_grid            | Gb channel gain grid |
+| b_gain_grid             | Blue channel gain grid |
+| is_save                 | Saves the module output |
 
 ### Bayer Noise Reduction
 
