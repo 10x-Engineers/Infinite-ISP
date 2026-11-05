@@ -131,9 +131,9 @@ demosaic:
 color_correction_matrix:
   #Row sum to 1 convention
   is_enable: true
-  corrected_red: [1.660, -0.527, -0.133]
-  corrected_green: [-0.408, 1.563, -0.082]
-  corrected_blue: [-0.055, -1.641, 2.695]
+  corrected_red: [2.833185236785184, -1.1713215030552702, -0.02565156512518323]
+  corrected_green: [-0.6939360364134142, 2.3436361376130823, -0.11073829641505105]
+  corrected_blue: [0.32549273845354526, -1.5019493348049742, 2.865444948949088]
   is_save: false
 
 gamma_correction:
@@ -179,7 +179,7 @@ saturation_enhancement:
   # Saturation enhancement, YUV after 2D noise reduction
   is_enable: true
   algorithm: "global"      # global (one Q4.8 gain on Cb/Cr, as the RTL) or hue_rolloff
-  saturation_gain: 1.5
+  saturation_gain: 1.0
   # hue_rolloff only:
   highlight_rolloff: 0.85  # luma (0..1) above which the boost fades out toward white
   shadow_fade: 0.35        # luma (0..1) below which the boost fades out toward black
