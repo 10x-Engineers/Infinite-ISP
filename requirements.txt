@@ -1,5 +1,6 @@
 matplotlib==3.5.1
 numpy==1.21.5
+opencv-python==4.8.1.78
 PyYAML==6.0
 rawpy==0.17.3
 scipy==1.7.3
