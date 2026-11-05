@@ -412,22 +412,20 @@ class JointBF:
                     i : i + in_img.shape[0], j : j + in_img.shape[1], ...
                 ]
 
-                # Adding normalization factor for each pixel needed to average out the
-                # final result
-                norm_fact += s_kern[i, j] * np.exp(
+                # range weight computed once and reused for both the normalization
+                # factor and the weighted sum (original computed np.exp() twice,
+                # same value both times -> bit-identical but 2x the exp cost)
+                w = np.exp(
                     -1 * (guide_img - guide_img_ext_array) ** 2 / (2 * stddev_r**2)
                 )
+                sw = s_kern[i, j] * w
+
+                # Adding normalization factor for each pixel needed to average out the
+                # final result
+                norm_fact += sw
 
                 # Summing up the final result
-                sum_filt_out += (
-                    s_kern[i, j]
-                    * np.exp(
-                        -1
-                        * (guide_img - guide_img_ext_array) ** 2
-                        / (2 * stddev_r**2)
-                    )
-                    * in_img_ext_array
-                )
+                sum_filt_out += sw * in_img_ext_array
 
         filt_out = sum_filt_out / norm_fact
 
