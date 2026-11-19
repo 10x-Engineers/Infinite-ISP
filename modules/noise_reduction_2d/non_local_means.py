@@ -9,6 +9,7 @@ Author: 10xEngineers
 ------------------------------------------------------------
 """
 import numpy as np
+import cv2
 from tqdm import tqdm
 
 
@@ -128,18 +129,22 @@ class NLM:
 
     def apply_mean_filter(self, array, patch_size):
         """
-        Applying Mean Filter
+        Applying Mean Filter (accelerated, bit-identical to original).
+
+        Uses cv2.boxFilter as a fast integer window sum. The cv2 module is a
+        C extension; pylint cannot see its members, so no-member is disabled
+        for this function.
+        # pylint: disable=no-member
         """
-        padded_array = np.pad(array, patch_size // 2, mode="reflect")
-        summed_up_arrays = np.zeros([array.shape[0], array.shape[1]])
-
-        for i in range(patch_size):
-            for j in range(patch_size):
-                summed_up_arrays += np.int32(
-                    padded_array[i : i + array.shape[0], j : j + array.shape[1], ...]
-                )
-
-        output_mean_filtered = ((summed_up_arrays) / patch_size**2).astype(
-            array.dtype
+        # Original: reflect-pad, then sum the p*p window in float64 and truncate
+        # /p^2 to int32. cv2.boxFilter(normalize=False) returns the exact integer
+        # window sum in a single C call (identical to the float64 sum), and
+        # S//(p*p) == trunc(S/p^2) for non-negative values, so this is bit-identical.
+        # Note: cv2 BORDER_REFLECT_101 == np.pad 'reflect'; cv2 BORDER_REFLECT is
+        # 'symmetric' (a common trap).
+        p = patch_size
+        window_sum = cv2.boxFilter(  # pylint: disable=no-member
+            array, ddepth=-1, ksize=(p, p), anchor=(-1, -1), normalize=False,
+            borderType=cv2.BORDER_REFLECT_101  # pylint: disable=no-member
         )
-        return output_mean_filtered
+        return (window_sum // (p * p)).astype(array.dtype)
